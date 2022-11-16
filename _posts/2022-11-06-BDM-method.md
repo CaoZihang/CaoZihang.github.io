@@ -62,5 +62,7 @@ else：
 
 **当消费者支付意愿存在不确定时，拍卖的激励相容性不再成立**
 
+----
+
 [^1]:Becker, G. M., DeGroot, M. H., & Marschak, J. (1964). Measuring utility by a single‐response sequential method. _Behavioral science_, _9_(3), 226-232.
 [^2]: Wertenbroch, K., & Skiera, B. (2002). Measuring consumers' willingness to pay at the point of purchase. _Journal of marketing research_, _39_(2), 228-241.
