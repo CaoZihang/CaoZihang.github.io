@@ -64,5 +64,5 @@ else：
 
 ----
 
-[^1]:Becker, G. M., DeGroot, M. H., & Marschak, J. (1964). Measuring utility by a single‐response sequential method. _Behavioral science_, _9_(3), 226-232.
-[^2]: Wertenbroch, K., & Skiera, B. (2002). Measuring consumers' willingness to pay at the point of purchase. _Journal of marketing research_, _39_(2), 228-241.
+[^1]:Becker, G. M., Degroot, M. H., & Marschak, J. (1964). Measuring utility by a single-response sequential method. *Behavioral Science*, *9*(3), 226–232. https://doi.org/10.1002/bs.3830090304
+[^2]: Wertenbroch, K., & Skiera, B. (2002). Measuring Consumers’ Willingness to Pay at the Point of Purchase. *Journal of Marketing Research*, *39*(2), 228–241. https://doi.org/10.1509/jmkr.39.2.228.19086
