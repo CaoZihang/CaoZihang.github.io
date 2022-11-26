@@ -1,6 +1,6 @@
 ---
 layout:       post
-title:        "【日常】与朋友交流：研究中客观理性&社交媒体三则研究"
+title:        "【日常】与朋友交流：研究中客观理性与社交媒体三则研究"
 author:       "Cao Zihang"
 header-style: text
 catalog:      true
