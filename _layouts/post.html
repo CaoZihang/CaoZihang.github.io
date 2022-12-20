@@ -8,6 +8,8 @@ layout: default
 
 <!-- Post Header -->
 {% include intro-header.html type='post' %}
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
 <!-- Post Content -->
 <article>
@@ -171,3 +173,12 @@ layout: default
     }
 </style>
 {% endif %}
+
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    processEscapes: true
+  }
+};
+</script>
