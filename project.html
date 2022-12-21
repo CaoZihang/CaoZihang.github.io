@@ -1,58 +1,48 @@
 ---
-layout: default
+layout: page
 title: "项目 | Project"
 description: "「蜗牛正在慢.慢.慢.慢...爬」"
 header-img: "img/use/pj-bg.jpg"
+header-mask: 0.3
+multilingual: true
 ---
-<!-- Page Header -->
-{% include intro-header.html type='page' short=true %}
 
-{% for project in site.projects %}
-  <a href="{{ project.link }}">
-    <h2 class="post-title">{{ project.title }}</h2>
-  </a>
-<!--  <span id="pop-order"><span class="pop-current-popular_post-number">{{ popular_post.number }}</span>/5</span>-->
-{% endfor %}
+{% include multilingual-sel.html %}
 
-<!--{% for post in paginator.posts %}-->
-
-<!--<article class="post-preview">-->
-<!--  <a href="{{ post.url | prepend: site.baseurl | replace: '//', '/' }}">-->
-<!--    <h2 class="post-title">{{ post.title }}</h2>-->
-<!--    {% if post.subtitle %}-->
-<!--    <h3 class="post-subtitle">{{ post.subtitle }}</h3>-->
-<!--    {% else %}-->
-<!--    <h3 class="post-subtitle">{{ post.excerpt | strip_html | truncatewords: 15 }}</h3>-->
-<!--    {% endif %}-->
-<!--  </a>-->
-<!--  <p class="post-meta">Posted by-->
-<!--    {% if post.author %}-->
-<!--    {{ post.author }}-->
-<!--    {% else %}-->
-<!--    {{ site.author }}-->
-<!--    {% endif %}-->
-<!--    on {{ post.date | date: '%B %d, %Y' }} &middot; {% include read_time.html content=post.content %}-->
-<!--  </p>-->
-<!--</article>-->
-
-<!--<hr>-->
-
-<!--{% endfor %}-->
-
-<!-- Pager -->
-{% if paginator.total_pages > 1 %}
-
-<div class="clearfix">
-
-  {% if paginator.previous_page %}
-  <a class="btn btn-primary float-left" href="{{ paginator.previous_page_path | prepend: site.baseurl | replace: '//', '/' }}">&larr;
-    Newer<span class="d-none d-md-inline"> Posts</span></a>
-  {% endif %}
-
-  {% if paginator.next_page %}
-  <a class="btn btn-primary float-right" href="{{ paginator.next_page_path | prepend: site.baseurl | replace: '//', '/' }}">Older<span class="d-none d-md-inline"> Posts</span> &rarr;</a>
-  {% endif %}
-
+<!-- Chinese Version -->
+<div class="zh post-container">
+    {% capture project_zh %}{% include project/zh.md %}{% endcapture %}
+    {{ project_zh | markdownify }}
 </div>
 
+<!-- English Version -->
+<div class="en post-container">
+    {% capture project_en %}{% include project/en.md %}{% endcapture %}
+    {{ project_en | markdownify }}
+</div>
+
+
+{% if site.disqus_username %}
+<!-- disqus 评论框 start -->
+<div class="comment">
+    <div id="disqus_thread" class="disqus-thread">
+
+    </div>
+</div>
+<!-- disqus 评论框 end -->
+
+<!-- disqus 公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = "{{site.disqus_username}}";
+    var disqus_identifier = "{{site.disqus_username}}/{{page.url}}";
+    var disqus_url = "{{site.url}}{{page.url}}";
+
+    (function () {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<!-- disqus 公共JS代码 end -->
 {% endif %}
