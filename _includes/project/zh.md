@@ -1,42 +1,53 @@
 # <center><font color="#3879B1">数字商业社会</font></center>
 
-## 社会认同
+## <center>社会认同</center>
 
-[科技产品酷感](https://github.com/)
+[科技产品酷感特征识别与量表改进](https://github.com/)
 
+|     |            |
+| :------: | ------------------- |
+|**状态**|中断|
+| **进度** | 本科毕业论文完成（不满意） |
+|**修改思路**|初步|
+|**继续条件**|合作者；资金|
 
+选题由来：Warren等人于2019年在Journal of Marketing上发表的《Brand coolness》引起了卢泰宏老师等学者的关注和评论。出于兴趣，我追踪了Coolness相关的一系列研究，发现该领域存在较多空白，且我国大陆地区几乎没有学者涉猎。同时，考虑到我国诸多企业近年在科技产品领域持续创新，却少有产品能够孕育出宗教式的狂热群体，我想对消费者如何评价科技产品的酷感及企业如何调研产品的酷感程度进行研究或有一定的现实价值。
+
+在质性分析与文献阅读期间，我逐渐倾向于认为Coolness是一个非常特别的社会化因素，而不能仅仅视作一个单一的消费者个体行为变量，它是群体互动的产物并具有着异乎寻常的感染力，同时前人的研究表明Coolness对众多常见的市场营销因变量都有着不错的解释能力.....于是我认为应把消费者对科技产品的酷感感知问题与社会认同相关理论进行紧密连接，并做了一些初步的尝试。
 
 # <center><font color="#3879B1">消费者认知与行为</font></center>
 
-## 搜索
+## <center>搜索</center>
 
 
 
-## 认知
+## <center>认知</center>
 
 
 
-## 决策
+## <center>决策</center>
 
 
 
-## 传播
+## <center>传播</center>
 
 
 
 # <center><font color="#3879B1">数智化营销</font></center>
 
-## 数字化调研
+## <center>数字化调研</center>
 
 
 
-## 社会动力学与决策仿真
+## <center>社会动力学与决策仿真</center>
 
 
 
 
 
+<br/>
 
+<br/>
 
 > I also list a few topics that interest me and perhaps I want to study many of them in my future career.
 
