@@ -1,4 +1,4 @@
-# 数字商业社会
+# <center><font color="#3879B1">数字商业社会</font></center>
 
 ## 社会认同
 
@@ -6,7 +6,7 @@
 
 
 
-# 消费者认知与行为
+# <center><font color="#3879B1">消费者认知与行为</font></center>
 
 ## 搜索
 
@@ -24,7 +24,7 @@
 
 
 
-# 数智化营销
+# <center><font color="#3879B1">数智化营销</font></center>
 
 ## 数字化调研
 
