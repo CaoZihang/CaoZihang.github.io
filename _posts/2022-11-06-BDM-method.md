@@ -1,6 +1,6 @@
 ---
 layout:       post
-title:        "识别消费者支付意愿：The Becker-DeGroot-Marschak Mechanism 1964"
+title:        "【方法】识别消费者支付意愿：The Becker-DeGroot-Marschak Mechanism 1964"
 author:       "Cao Zihang"
 header-style: text
 catalog:      true
