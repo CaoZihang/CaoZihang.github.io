@@ -10,8 +10,9 @@ tags:
     - 组织行为
 ---
 
+![906b0a76ee6c35f9](https://img.czhread.asia/img/202304151043628.png)
 
-![](https://s3.bmp.ovh/imgs/2022/10/31/906b0a76ee6c35f9.png)
+
 
 **导语**
 
