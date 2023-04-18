@@ -10,7 +10,7 @@
 
 ## <center>认知</center>
 
-[科技产品酷感特征识别与量表改进](https://github.com/)
+[科技产品酷感特征识别与量表改进](http://blog.czhread.asia/2022/04/23/product-coolness/)
 
 |              |                              |
 | :----------: | ---------------------------- |
