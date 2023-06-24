@@ -11,14 +11,14 @@ multilingual: true
 
 <!-- Chinese Version -->
 <div class="zh post-container">
-    {% capture topical_hu_zh %}{% include topical/zh.md %}{% endcapture %}
-    {{ topical_hub_zh | markdownify }}
+    {% capture topical_zh %}{% include topical/zh.md %}{% endcapture %}
+    {{ topical_zh | markdownify }}
 </div>
 
 <!-- English Version -->
 <div class="en post-container">
-    {% capture topical_hu_en %}{% include topical/en.md %}{% endcapture %}
-    {{ topical_hub_en | markdownify }}
+    {% capture topical_en %}{% include topical/en.md %}{% endcapture %}
+    {{ topical_en | markdownify }}
 </div>
 
 
