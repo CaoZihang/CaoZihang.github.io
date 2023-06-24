@@ -1,8 +1,8 @@
 ---
 layout: page
-title: "联系 | Contact"
-description: "「···」"
-header-img: "img/use/cv-bg.jpg"
+title: "专栏 | Topical Hub"
+description: "「聚沙成塔丨积羽沉舟」"
+header-img: "img/use/topical_hub.png"
 header-mask: 0.3
 multilingual: true
 ---
@@ -11,24 +11,24 @@ multilingual: true
 
 <!-- Chinese Version -->
 <div class="zh post-container">
-    {% capture about_zh %}{% include about/zh.md %}{% endcapture %}
-    {{ about_zh | markdownify }}
+    {% capture project_zh %}{% include topical_hub/zh.md %}{% endcapture %}
+    {{ topical_hub_zh | markdownify }}
 </div>
 
 <!-- English Version -->
 <div class="en post-container">
-    {% capture about_en %}{% include about/en.md %}{% endcapture %}
-    {{ about_en | markdownify }}
+    {% capture project_en %}{% include topical_hub/en.md %}{% endcapture %}
+    {{ topical_hub_en | markdownify }}
 </div>
 
 
 {% if site.disqus_username %}
 <!-- disqus 评论框 start -->
-<div class="comment">
+<!-- <div class="comment">
     <div id="disqus_thread" class="disqus-thread">
 
     </div>
-</div>
+</div> -->
 <!-- disqus 评论框 end -->
 
 <!-- disqus 公共JS代码 start (一个网页只需插入一次) -->

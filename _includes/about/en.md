@@ -1,18 +1,16 @@
-# Education
+# Introduction
 
 1. test
 
 
 
-- [ ] 
+# Skills
 
-# Skill
+- [ ] 
 
 
 
 
 
 # Experience
-
-test
 

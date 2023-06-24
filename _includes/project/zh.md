@@ -27,12 +27,6 @@
 
 
 
-## <center>智能决策</center>
+## <center>人机协同决策</center>
 
 
-
-
-
-<br/>
-
-<br/>
