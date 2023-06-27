@@ -47,8 +47,8 @@
                     {% comment %} always create a h2 for keeping the margin {% endcomment %}
                     <h2 class="subheading">{{ page.subtitle }}</h2>
                     <span class="meta">Posted by {% if page.author %}{{ page.author }}{% else %}{{ site.title }}{% endif %} on {{ page.date | date: "%B %-d, %Y" }}</span>
-                    <span class="meta">Word Count: {{ page.content | number_of_words}}</span>
-                    <!-- 跨语种版本github page暂不支持 number_of_words: "auto" -->
+                    <span class="meta">Word Count: {{ page.content | number_of_words}} （受github pages Jekyll版本影响中文统计暂时不准）</span>
+                    <!-- 跨语种版本github pages暂不支持 number_of_words: "auto" -->
                 </div>
             </div>
         </div>
