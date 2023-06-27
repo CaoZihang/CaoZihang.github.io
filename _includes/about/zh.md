@@ -3,7 +3,7 @@
 <table style="border-collapse: separate;">
     <tbody>
         <tr>
-            <td style="border-top: 0px !important; border-bottom: 0px !important; border-right: 0px !important; border-left: 10px solid #3879B1 !important; border-radius: 6px !important; ">
+            <td style="border-top: 0px !important; border-bottom: 0px !important; border-right: 0px !important; border-left: 10px solid #3879B1 !important; border-radius: 6px !important; white-space: normal;">
                 <p>
                     嗨！欢迎来到曹梓航的学术博客！<br>
                     <br>
@@ -30,6 +30,8 @@
         </tr>
     </tbody>
 </table>
+
+
 
 # 技能
 
