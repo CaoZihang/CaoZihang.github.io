@@ -1,0 +1,9 @@
+{% capture dates %}
+{% for post in site.posts %}
+<div class="post-preview">
+    {{ post.date | date: "%Y-%m-%d" }}
+    {{post_dates | append: date}}
+</div>
+{% endfor %}
+{% endcapture%}
+<p>{{dates}}</p>

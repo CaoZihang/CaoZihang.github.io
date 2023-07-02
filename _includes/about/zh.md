@@ -1,4 +1,4 @@
-# 个人简介
+# <center>个人简介</center>
 
 <table style="border-collapse: separate;">
     <tbody>
