@@ -1973,7 +1973,7 @@ ul#markdown-toc {
     background-color: white; */
 }
 
-ul#markdown-toc >li>a {
+ul#markdown-toc>li>a {
     color: #000;
     font-weight: bold;
 }
