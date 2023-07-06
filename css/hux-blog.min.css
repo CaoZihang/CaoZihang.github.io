@@ -2018,3 +2018,47 @@ button.light:hover {
 button.light:active {
     box-shadow: none;
 }
+
+.academia.table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    width: auto;
+    /*max-width: 100%;*/
+    border-top: 2.27px solid black;
+    border-bottom: 2.27px solid black;
+    overflow-x: auto;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.academia.table th,
+.academia.table td {
+    border: 0 none !important;
+    padding: 0.51rem !important;
+    line-height: 1.1 !important;
+}
+
+.academia.table>tbody>tr:first-child>td,
+.academia.table>tbody>tr:first-child>th {
+    border-top: 1.36px solid black !important;
+}
+
+.academia.table>tbody>tr:last-child>td,
+.academia.table>tbody>tr:last-child>th {
+    border-bottom: 1.36px solid black !important;
+}
+
+.academia.table thead th {
+    background-color: white !important;
+    font-weight: 700;
+    padding: 8px 9px 5px 9px;
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+.academia.table tr:nth-child(even) {
+    background-color: #ebecf1 !important;
+}
+
+.academia.table tbody tr:hover td {
+    background-color: #f5f1da !important;
+}

@@ -202,7 +202,6 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-
 =======================================================================
 Hux Blog Subcomponents:
 
@@ -214,3 +213,7 @@ licenses.
 (MIT License) Clean Blog Jekyll Theme: https://github.com/BlackrockDigital/startbootstrap-clean-blog-jekyll/
 https://github.com/BlackrockDigital/startbootstrap-clean-blog-jekyll/blob/master/LICENSE
 Copyright (c) 2013-2016 Blackrock Digital LLC.
+
+=======================================================================
+The CaoZihang Blog Project is based on The Hux Blog project and Clean
+Blog Jekyll Theme, and I made some feature tweaks to suit my personal needs.

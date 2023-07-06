@@ -11,14 +11,6 @@ header-mask: 0.3
     <p>【点击对应栏目跳转】</p>
 </blockquote>
 
-<!-- 日历图 -->
-<div style="border-collapse: separate;">
-    {% include calendar.html %}
-</div>
-
-<!-- 横线 -->
-<p width=window.innerWidth style="border-top: 6px solid #3879B1;border-radius: 6px; margin-bottom: 6px;"></p>
-
 <!-- 按钮 -->
 <div style="display: flex; margin-top:16px; margin-bottom: 30px; justify-content:center; white-space: normal;">
     <button id='Virtualization' class='light' style="margin-right: 20px;">
@@ -106,6 +98,15 @@ header-mask: 0.3
         choice.style.display = "block";
     });
 </script>
+
+<!-- 横线 -->
+<p width=window.innerWidth style="border-top: 6px solid #3879B1;border-radius: 6px; margin-bottom: 30px;"></p>
+
+<!-- 日历图 -->
+<div style="border-collapse: separate;">
+    {% include calendar.html %}
+</div>
+
 
 <!-- 安装图标库 -->
 <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
