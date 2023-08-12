@@ -23,10 +23,11 @@
 
 # <center><font color="#3879B1">数智化营销</font></center>
 
-## <center>社会动力学仿真</center>
-
-
-
 ## <center>人机协同决策</center>
+
+
+
+## <center>社会仿真</center>
+
 
 
