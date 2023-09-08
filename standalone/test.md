@@ -1,6 +1,7 @@
 ---
 layout: post
 permalink: /test
+hide-in-nav: true
 ---
 # Test
 

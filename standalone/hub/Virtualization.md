@@ -1,5 +1,6 @@
 ---
 permalink: /z2_topical_hub/Virtualization
+hide-in-nav: true
 ---
 # <center><font color="#3879B1">可视化</font></center>
 

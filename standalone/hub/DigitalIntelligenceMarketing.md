@@ -1,5 +1,6 @@
 ---
 permalink: /z2_topical_hub/DigitalIntelligenceMarketing
+hide-in-nav: true
 ---
 # <center><font color="#3879B1">数智化营销</font></center>
 
