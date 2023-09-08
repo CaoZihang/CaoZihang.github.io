@@ -1,7 +1,7 @@
 ---
 permalink: /z2_topical_hub/Methods
 hide-in-nav: true
-layout: hub
+layout: none
 ---
 # <center><font color="#3879B1">研究方法</font></center>
 
