@@ -13,93 +13,56 @@ header-mask: 0.3
 
 <!-- 按钮 -->
 <div style="display: flex; margin-top:16px; margin-bottom: 30px; justify-content:center; white-space: normal;">
-    <button id='Virtualization' class='light' style="margin-right: 20px;">
-        <!-- <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"
-            stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"> -->
-        <!-- <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon> -->
-        <!-- </svg>  -->
+    <button id='Virtualization' class='light hub_choice' style="margin-right: 20px;">
         <ion-icon name="desktop-outline" size="large"></ion-icon>
         可视化<br>
         Virtualization
     </button>
-    <button id='DigitalIntelligenceMarketing' class='light'>
+    <button id='DigitalIntelligenceMarketing' class='light hub_choice'>
         <ion-icon name="pulse-outline" size="large"></ion-icon>
         数智化营销<br>
         Digital Intelligence Marketing
     </button>
 </div>
 <div style="display: flex; margin-top:16px; margin-bottom: 30px; justify-content:center; white-space: normal;">
-    <button id='Methods' class='light' style="margin-right: 20px;">
+    <button id='Methods' class='light hub_choice' style="margin-right: 20px;">
         <ion-icon name="library-outline" size="large"></ion-icon>
         研究方法<br>
         Research Method
     </button>
-    <button id="Tools" class='light'>
+    <button id="Tools" class='light hub_choice'>
         <ion-icon name="construct-outline" size="large"></ion-icon>
         日常工具<br>
         Toolbox
     </button>
 </div>
 
-<div id="Virtualization_content" class="topics">
-    {% capture topical_Virtualization %}{% include topical/Virtualization.md %}{% endcapture %}
-    {{ topical_Virtualization | markdownify }}
-</div>
+<div class="post-container" id="hub_content">
 
-<div id="DigitalIntelligenceMarketing_content" class="topics">
-    {% capture topical_DigitalIntelligenceMarketing %}{% include topical/DigitalIntelligenceMarketing.md %}{% endcapture
-    %}
-    {{ topical_DigitalIntelligenceMarketing | markdownify }}
-</div>
-
-<div id="Methods_content" class="topics">
-    {% capture topical_Methods %}{% include topical/Methods.md %}{% endcapture %}
-    {{ topical_Methods | markdownify }}
-</div>
-
-<div id="Tools_content" class="topics">
-    {% capture topical_Tools %}{% include topical/Tools.md %}{% endcapture %}
-    {{ topical_Tools | markdownify }}
 </div>
 
 <script>
-    var choices = document.getElementsByClassName("topics");
-    console.log(choices.length)
-    for (var i = 0; i < choices.length; i++) {
-        choices[i].style.display = 'none';
+    let choices = document.querySelectorAll('.hub_choice');
+    choices.forEach((choice) => {
+        choice.onclick = handlehub;
+    })
+
+    function handlehub(e) {
+        let httpRequest = new XMLHttpRequest();
+        httpRequest.onreadystatechange = handleResponse;
+        httpRequest.open('GET', e.target.id + '.html');
+        httpRequest.send();
     }
-    var choice = '';
-    document.getElementById("Virtualization").addEventListener("click", function () {
-        if (choice != false) {
-            choice.style.display = "none";
+
+    function handleResponse(e) {
+        if (e.target.readyState == XMLHttpRequest.DONE && e.target.status == 200) {
+            document.querySelector('#hub_content').innerHTML = e.target.responseText;
         }
-        choice = document.getElementById("Virtualization_content");
-        choice.style.display = "block";
-    });
-    document.getElementById("DigitalIntelligenceMarketing").addEventListener("click", function () {
-        if (choice != false) {
-            choice.style.display = "none";
-        }
-        choice = document.getElementById("DigitalIntelligenceMarketing_content");
-        choice.style.display = "block";
-    });
-    document.getElementById("Methods").addEventListener("click", function () {
-        if (choice != false) {
-            choice.style.display = "none";
-        }
-        choice = document.getElementById("Methods_content");
-        choice.style.display = "block";
-    });
-    document.getElementById("Tools").addEventListener("click", function () {
-        if (choice != false) {
-            choice.style.display = "none";
-        }
-        choice = document.getElementById("Tools_content");
-        choice.style.display = "block";
-    });
+    }
 </script>
 
 <!-- 横线 -->
+<br>
 <p width=window.innerWidth style="border-top: 6px solid #3879B1;border-radius: 6px; margin-bottom: 30px;"></p>
 
 <!-- 日历图 -->

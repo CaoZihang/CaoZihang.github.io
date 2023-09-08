@@ -11,9 +11,6 @@
                     <li style='background-color: #f2f2f2; border-top-left-radius: 6px;border-top-right-radius: 6px; display: flex; justify-content: center;list-style-position: inside;'>
                     	 〇 test 丨 test 丨 2018
                 	</li>
-                	<li style='background-color: #f2f2f2; border-bottom-left-radius: 6px;border-bottom-right-radius: 6px; display: flex; justify-content: center;list-style-position: inside;'>
-                    	〇 test 丨 test 丨 2018
-                	</li>
                     <br>
                     我期待遇见有趣的想法，尝试探索一些前沿的领域~
                 </p>
@@ -35,14 +32,18 @@
 
 
 
+
+
 # 技能
+
+- 编程语言：【Python】【R】【JavaScript】
 
 - test
 - test
 
 # 联系方式
 
-- Email：
+- Email：13601145702@163.com
 
 
 
