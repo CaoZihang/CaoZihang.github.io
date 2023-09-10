@@ -1,5 +1,5 @@
 ---
-permalink: /z2_topical_hub/Virtualization
+permalink: /z2_topical_hub/visualization
 hide-in-nav: true
 layout: none
 ---
