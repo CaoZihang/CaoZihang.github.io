@@ -5,7 +5,7 @@ header-img: img/use/home-background.jpg
 #email: 13601145702@163.com
 description: "这里是曹梓航的学术Blog | 抵近人类知识无人区"
 keyword: "曹梓航 Marketing Analysis"
-url: "https://blog.caozihang.com/" # your host, for absolute URL
+url: "https://www.caozihang.com/" # your host, for absolute URL
 baseurl: "" # for example, '/blog' if your blog hosted on 'host/blog'
 
 # Publish posts or collection documents with a future date.
