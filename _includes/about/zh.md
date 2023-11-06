@@ -9,7 +9,7 @@
                     <br>
                     我的专业是Marketing，我的研究兴趣聚焦于数字智能化新技术背景下的消费者认知、决策问题和前沿的市场调研技术<br>
                     <li style='background-color: #f2f2f2; border-top-left-radius: 6px;border-top-right-radius: 6px; display: flex; justify-content: center;list-style-position: inside;'>
-                    	 〇 test 丨 test 丨 2018
+                    	 〇 test 丨 test 丨 test
                 	</li>
                     <br>
                     我期待遇见有趣的想法，尝试探索一些前沿的领域~
@@ -22,7 +22,7 @@
                 <p align='center' style="line-height: 1; margin-bottom: 8px; margin-top: 35px; font-weight: bold">
                     粒子化照片
                 </p>
-                <img src="https://img.czhread.asia/img/202306261616374.gif" width='500' height='300' style='padding-top: 0em;'>
+                <img src="https://img.caozihang.com/img/202306261616374.gif" width='500' height='300' style='padding-top: 0em;'>
             </td>
         </tr>
     </tbody>
@@ -34,9 +34,10 @@
 
 
 
+
 # 技能
 
-- 编程语言：【Python】【R】【JavaScript】
+- 编程语言：【Python（熟悉）】【R（熟悉）】【JavaScript（入门）】【Julia（初学）】
 
 - test
 - test

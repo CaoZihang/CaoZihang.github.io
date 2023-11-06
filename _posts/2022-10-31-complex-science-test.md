@@ -10,7 +10,7 @@ tags:
     - 组织行为
 ---
 
-![906b0a76ee6c35f9](https://img.czhread.asia/img/202304151043628.png)
+![906b0a76ee6c35f9](https://img.caozihang.com/img/202304151043628.png)
 
 
 

@@ -1,4 +1,4 @@
-[科技产品酷感特征识别与量表改进](http://blog.czhread.asia/2022/04/23/product-coolness/)
+[科技产品酷感特征识别与量表改进](http://blog.caozihang.com/2022/04/23/product-coolness/)
 
 |              |                              |
 | :----------: | ---------------------------- |

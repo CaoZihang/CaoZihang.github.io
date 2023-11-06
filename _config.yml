@@ -5,7 +5,7 @@ header-img: img/use/home-background.jpg
 #email: 13601145702@163.com
 description: "这里是曹梓航的学术Blog | 抵近人类知识无人区"
 keyword: "曹梓航 Marketing Analysis"
-url: "https://blog.czhread.asia/" # your host, for absolute URL
+url: "https://blog.caozihang.com/" # your host, for absolute URL
 baseurl: "" # for example, '/blog' if your blog hosted on 'host/blog'
 
 # Publish posts or collection documents with a future date.
@@ -67,7 +67,7 @@ netease_comment: false
 
 # Analytics settings
 # Baidu Analytics
-ba_track_id: 503a4ab3cca86d0fbb18d49d75311960
+ba_track_id: e337341d466c2f1490dc76ec72c5aa0b
 
 # Google Analytics
 #ga_track_id: "UA-49627206-1" # Format: UA-xxxxxx-xx
@@ -76,7 +76,7 @@ ba_track_id: 503a4ab3cca86d0fbb18d49d75311960
 # Sidebar settings
 sidebar: true # whether or not using Sidebar.
 sidebar-about-description: "Marketing & Business Analysis <br> Beijing, China"
-sidebar-avatar: https://img.czhread.asia/img/me.jpg # use absolute URL, seeing it's used in both `/` and `/about/`
+sidebar-avatar: https://img.caozihang.com/img/me.jpg # use absolute URL, seeing it's used in both `/` and `/about/`
 
 # Featured Tags
 featured-tags: true # whether or not using Feature-Tags
