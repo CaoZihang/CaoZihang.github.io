@@ -108,14 +108,14 @@ function output(domain, path, subtitle, type) {
     match = path.match(pattern);
     url_path = match[1] + "/" + match[2] + "/" + match[3] + "/" + match[4] + "/";
     if (type === 1) {
-        pattern2 = /[\u4e00-\u9fa5 A-Za-z0-9]*/g;
+        pattern2 = /[\u4e00-\u9fa5 A-Za-z0-9-]*/g;
         url_subtitle = subtitle.match(pattern2).join('').trim().replace(/ /g, '-').toLowerCase();
         url_subtitle = "#" + url_subtitle;
     } else {
         url_subtitle = '';
     }
-    // str = `[${subtitle}](${domain + "/" + url_path + url_subtitle})`;
-    str = `<a href= ${domain + "/" + url_path + url_subtitle}>::marker ${subtitle}</a>`;
+    str = `[${subtitle}](${domain + "/" + url_path + url_subtitle})`;
+    // str = `<a href= ${domain + "/" + url_path + url_subtitle}>::marker ${subtitle}</a>`;
     return str
 }
 // splitLog
@@ -133,7 +133,7 @@ function splitLog(data, domain, table) {
     Promise.all(promises).then(tables => {
         let table = tables[0];
         let toc = "";
-        const head = "\n";
+        const head = "\n- ";
         for (let i = 0; i < table.length; i++) {
             toc += head + table[i];
         }
