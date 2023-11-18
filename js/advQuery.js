@@ -104,18 +104,20 @@ function extract(md, type, domain, path, table) {
 
 // output
 function output(domain, path, subtitle, type) {
-    pattern = /(\d{4})-(\d{1,2})-(\d{1,2})-([^.]*)/;
-    match = path.match(pattern);
-    url_path = match[1] + "/" + match[2] + "/" + match[3] + "/" + match[4] + "/";
+    const pattern = /(\d{4})-(\d{1,2})-(\d{1,2})-([^.]*)/;
+    let match = path.match(pattern);
+    let url_path = match[1] + "/" + match[2] + "/" + match[3] + "/" + match[4] + "/";
     if (type === 1) {
-        pattern2 = /[\u4e00-\u9fa5 A-Za-z0-9-]*/g;
+        const pattern2 = /[\u4e00-\u9fa5 A-Za-z0-9-]*/g;
         url_subtitle = subtitle.match(pattern2).join('').trim().replace(/ /g, '-').toLowerCase();
         url_subtitle = "#" + url_subtitle;
+        readSymbol = '【阅】';
     } else {
+        readSymbol = "";
         url_subtitle = '';
     }
-    str = `[${subtitle}](${domain + "/" + url_path + url_subtitle})`;
-    // str = `<a href= ${domain + "/" + url_path + url_subtitle}>::marker ${subtitle}</a>`;
+    let str = `[${readSymbol+subtitle}](${domain + "/" + url_path + url_subtitle})`;
+    // let str = `<a href= ${domain + "/" + url_path + url_subtitle}>::marker ${subtitle}</a>`;
     return str
 }
 // splitLog
