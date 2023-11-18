@@ -70,7 +70,32 @@ header-mask: 0.3
     {% include calendar.html %}
 </div>
 
+<!-- 文章库 -->
+<div>
+    <button type="button" class="btn btn-outline-secondary btn-lg" id="all">全部文章</button>
+</div>
+<div id="showAll">
 
+</div>
+<script>
+    let all = document.querySelectorAll('#all');
+    all.forEach((all) => {
+        all.onclick = handleAll;
+    })
+
+    function handleAll(e) {
+        let httpRequest = new XMLHttpRequest();
+        httpRequest.onreadystatechange = handleResponse;
+        httpRequest.open('GET', 'hub.html');
+        httpRequest.send();
+    }
+
+    function handleResponse(e) {
+        if (e.target.readyState == XMLHttpRequest.DONE && e.target.status == 200) {
+            document.querySelector('#showAll').innerHTML = e.target.responseText;
+        }
+    }
+</script>
 <!-- 安装图标库 -->
 <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
 <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>

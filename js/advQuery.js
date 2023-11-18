@@ -115,7 +115,7 @@ function output(domain, path, subtitle, type) {
         url_subtitle = '';
     }
     // str = `[${subtitle}](${domain + "/" + url_path + url_subtitle})`;
-    str = `<a href= ${domain + "/" + url_path + url_subtitle}>${subtitle}</a>`;
+    str = `<a href= ${domain + "/" + url_path + url_subtitle}>::marker ${subtitle}</a>`;
     return str
 }
 // splitLog
@@ -133,7 +133,7 @@ function splitLog(data, domain, table) {
     Promise.all(promises).then(tables => {
         let table = tables[0];
         let toc = "";
-        const head = "\n- ";
+        const head = "\n";
         for (let i = 0; i < table.length; i++) {
             toc += head + table[i];
         }
