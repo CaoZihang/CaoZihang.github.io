@@ -5082,7 +5082,8 @@ textarea.input-group-sm>.input-group-btn>.btn {
     }
 }
 
-@media (min-width:768px) {
+/* 原值768px */
+@media (min-width:1272px) {
     .navbar-header {
         float: left
     }
@@ -5102,7 +5103,8 @@ textarea.input-group-sm>.input-group-btn>.btn {
     overflow-y: auto
 }
 
-@media (min-width:768px) {
+/* 原值768px */
+@media (min-width:1272px) {
     .navbar-collapse {
         width: auto;
         border-top: 0;
@@ -5151,6 +5153,7 @@ textarea.input-group-sm>.input-group-btn>.btn {
     margin-left: -15px
 }
 
+/* 原值768px */
 @media (min-width:768px) {
 
     .container-fluid>.navbar-collapse,
@@ -5253,7 +5256,8 @@ textarea.input-group-sm>.input-group-btn>.btn {
     margin-top: 4px
 }
 
-@media (min-width:768px) {
+/* 原值768px */
+@media (min-width:1272px) {
     .navbar-toggle {
         display: none
     }
@@ -5264,8 +5268,10 @@ textarea.input-group-sm>.input-group-btn>.btn {
 }
 
 .navbar-nav>li>a {
-    padding-top: 10px;
-    padding-bottom: 10px;
+    /* 原值10px */
+    padding-top: 5px;
+    /* 原值10px */
+    padding-bottom: 5px;
     line-height: 20px
 }
 
@@ -5307,8 +5313,10 @@ textarea.input-group-sm>.input-group-btn>.btn {
     }
 
     .navbar-nav>li>a {
-        padding-top: 15px;
-        padding-bottom: 15px
+        /* 原值15px */
+        padding-top: 5px;
+        /* 原值15px */
+        padding-bottom: 5px
     }
 }
 

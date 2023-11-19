@@ -1061,7 +1061,8 @@ samp {
     text-decoration: none !important
 }
 
-@media only screen and (max-width:767px) {
+/* 原值767px */
+@media only screen and (max-width:1271px) {
     .navbar-default .navbar-collapse {
         position: absolute;
         right: 0;
@@ -1161,7 +1162,9 @@ samp {
     background: rgba(0, 0, 0, .12)
 }
 
-@media only screen and (min-width:768px) {
+
+/* 原值768px */
+@media only screen and (min-width:1272px) {
     .navbar-custom {
         background: 0 0;
         border-bottom: 1px solid transparent
