@@ -39,7 +39,7 @@
 
 - 编程语言：【Python（熟悉）】【R（熟悉）】【JavaScript（入门）】【Julia（初学）】
 
-- test
+- Web开发：【Django】【Vue 3】【Bootstrap 5】【Vuetify】【Electron】
 - test
 
 # 联系方式
