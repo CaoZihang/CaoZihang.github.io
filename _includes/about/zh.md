@@ -15,7 +15,7 @@
                     我期待遇见有趣的想法，尝试探索一些前沿的领域~
                 </p>
                 <p>
-                    我感兴趣的学科主要包括：市场学、数据科学、行为科学、复杂科学、社会学、历史学
+                    我感兴趣的学科主要包括：市场学、数据科学、行为科学、复杂科学、历史学
                 </p>
             </td>
             <td style="border-top: 0px !important; border-bottom: 0px !important; border-left: 0px !important; border-right: 10px solid #3879B1 !important; border-radius: 6px !important; ">
@@ -35,16 +35,17 @@
 
 
 
+
 # 技能
 
-- 编程语言：【Python（熟悉）】【R（熟悉）】【JavaScript（入门）】【Julia（初学）】
+- 编程语言：【Python（熟悉）】【R（熟悉）】【JavaScript（一般）】【Julia（初学）】
 
-- Web开发：【Django】【Vue 3】【Bootstrap 5】【Vuetify】【Electron】
+- Web & Software 开发：【Vue 3】【Bootstrap 5】【Vuetify】【Django】【Electron】【PySide6】
 - test
 
 # 联系方式
 
-- Email：13601145702@163.com
+- Email：cao_zihang@126.com
 
 
 
