@@ -17,10 +17,6 @@
 
 
 
-## <center>传播</center>
-
-
-
 # <center><font color="#3879B1">数智化营销</font></center>
 
 ## <center>人机协同决策</center>
