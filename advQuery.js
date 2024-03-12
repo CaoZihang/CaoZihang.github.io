@@ -142,6 +142,8 @@ function splitLog(data, domain, table) {
         return toc;
     }).then(toc => {
         writeLog(toc);
+    }).then(() => {
+        console.log('文章库已更新');
     });
 }
 
