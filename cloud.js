@@ -4,8 +4,8 @@ const fs = require("fs");
 const path = require('path');
 
 // 涉及的文件夹路径
-const dirs_use = ["./_posts", "./_includes/about", "./_includes/posts",
-"./_includes/project", "./_includes/topical", "./_includes/workflow"];
+const dirs_use = ["./_posts", "./_includes/about", "./_includes/project",
+"./_includes/topical", "./_includes/workflow"];
 
 // 文件夹读取函数-core
 function dirRead(direction) {
