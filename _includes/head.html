@@ -34,6 +34,9 @@
 
     <title>{% if page.title %}{{ page.title }} - {{ site.SEOTitle }}{% else %}{{ site.SEOTitle }}{% endif %}</title>
 
+    <!-- 云服务器图床 -->
+    <script src="/js/img_host.js"></script>
+
     <!-- Web App Manifest -->
     <link rel="manifest" href="{{ site.baseurl }}/pwa/manifest.json">
 
@@ -68,16 +71,17 @@
 
     <!-- baidu statistic -->
     <script>
-    var _hmt = _hmt || [];
-    (function() {
-     var hm = document.createElement("script");
-     hm.src = "https://hm.baidu.com/hm.js?e337341d466c2f1490dc76ec72c5aa0b";
-     var s = document.getElementsByTagName("script")[0];
-     s.parentNode.insertBefore(hm, s);
-    })();
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?e337341d466c2f1490dc76ec72c5aa0b";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
     </script>
 
     <!-- Google AdSense -->
-<!--    <script data-ad-client="ca-pub-6487568398225121" async-->
-<!--        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>-->
+    <!--    <script data-ad-client="ca-pub-6487568398225121" async-->
+    <!--        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>-->
+
 </head>
