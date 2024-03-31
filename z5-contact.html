@@ -21,3 +21,36 @@ multilingual: true
     {% capture about_en %}{% include about/en.md %}{% endcapture %}
     {{ about_en | markdownify }}
 </div>
+
+<script>
+    const skill_tab_1 = document.querySelector("#skill_tab_1");
+    const skill_tab_2 = document.querySelector("#skill_tab_2");
+    const skill_tab_3 = document.querySelector("#skill_tab_3");
+    const skill_1 = document.querySelector("#skill_1");
+    const skill_2 = document.querySelector("#skill_2");
+    const skill_3 = document.querySelector("#skill_3");
+    skill_tab_1.addEventListener("click", () => {
+        skill_tab_1.classList.add("using");
+        skill_tab_2.classList.remove("using");
+        skill_tab_3.classList.remove("using");
+        skill_1.style.display = "flex";
+        skill_2.style.display = "none";
+        skill_3.style.display = "none";
+    });
+    skill_tab_2.addEventListener("click", () => {
+        skill_tab_2.classList.add("using");
+        skill_tab_1.classList.remove("using");
+        skill_tab_3.classList.remove("using");
+        skill_1.style.display = "none";
+        skill_2.style.display = "flex";
+        skill_3.style.display = "none";
+    });
+    skill_tab_3.addEventListener("click", () => {
+        skill_tab_3.classList.add("using");
+        skill_tab_1.classList.remove("using");
+        skill_tab_2.classList.remove("using");
+        skill_1.style.display = "none";
+        skill_2.style.display = "none";
+        skill_3.style.display = "flex";
+    });
+</script>
