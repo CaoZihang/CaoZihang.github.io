@@ -182,6 +182,20 @@ button:hover svg {
     border-radius: 20px;
 }
 
+@media (max-width: 429px) {
+    .skillSection>.use {
+        margin-top: 70% !important;
+    }
+
+    .skillSection>.use>button {
+        font-size: 0.5em !important;
+    }
+
+    .skillSection>.use>.using {
+        font-size: 1em !important;
+    }
+}
+
 .skillSection > .use {
     z-index: 1;
     color: white;
