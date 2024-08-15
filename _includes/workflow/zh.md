@@ -4,21 +4,6 @@
 
 ---
 
-# 信息收集
+# Academic Workflow
 
-
-
-# 信息获取
-
-
-
-
-
-# 信息处理
-
-
-
-
-
-# 信息输出
-
+![image-20240815193046500](https://img.caozihang.com/img/202408151931277.png)
