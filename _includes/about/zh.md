@@ -17,6 +17,9 @@
                 <p>
                     我感兴趣的学科主要包括：市场学、数据科学、行为科学、复杂科学、历史学
                 </p>
+                <p>
+                    我的兴趣爱好主要包括：Web开发、嵌入式
+                </p>
             </td>
             <td style="border-top: 0px !important; border-bottom: 0px !important; border-left: 0px !important; border-right: 10px solid #3879B1 !important; border-radius: 6px !important; ">
                 <p align='center' style="line-height: 1; margin-bottom: 8px; margin-top: 35px; font-weight: bold">
@@ -27,6 +30,7 @@
         </tr>
     </tbody>
 </table>
+
 # 技能
 <div class="skillSection">
     <div class="skillContainer" id="skill_1">
