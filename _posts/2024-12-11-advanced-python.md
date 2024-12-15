@@ -10,6 +10,9 @@ tags:
 ---
 
 # Advanced Python
+
+{:toc}
+
 ## 数据处理
 ### \*拆包与强制关键字参数
 #### 拆包
@@ -86,8 +89,75 @@ print(Color(1))
 
 # 比较枚举成员
 print(Color.RED is Color(1))
-
 ```
+
+#### 枚举的高级特性
+
+**确保唯一值 & 自动分配值**
+
+```python
+from enum import Enum, auto, unique
+
+@unique # 确保枚举值唯一
+class Color(Enum):
+    RED = auto()    # 自动分配值
+    GREEN = auto()
+    BLUE = auto()
+
+    def is_warm(self):
+        return self in (Color.RED,)
+
+    @property
+    def rgb(self):
+        _rgb_values = {
+            Color.RED: (255, 0, 0),
+            Color.GREEN: (0, 255, 0),
+            Color.BLUE: (0, 0, 255)
+        }
+        return _rgb_values[self]
+
+print(Color.RED.rgb)
+```
+
+使用函数式创建枚举：`Animal = Enum('Animal', ['DOG', 'CAT', 'RAT])`
+
+使用字典创建枚举
+```python
+Status = Enum('Status', {
+    'ACTIVE': 1,
+    'INACTIVE': 2,
+    'DELETED': 3
+})
+```
+
+**整数值枚举**
+
+```python
+from enum import IntEnum
+
+# 要求所有成员都是整数
+class Color(IntEnum):
+    RED = 1
+    GREEN = 2
+    BLUE = 3
+```
+
+**支持位运算（逻辑门）**
+
+```python
+from enum import Flag
+
+class Permission(Flag):
+    READ = auto()
+    WRITE = auto()
+    DELETE = auto()
+
+user_permission = Permission.READ | Permission.WRITE
+if Permission.READ in user_permission: ...
+```
+
+枚举常用于配置管理、状态机、数据库模型。
+
 ## 函数
 ### 高阶函数
 接受函数作为参数，或把函数作为结果返回的函数即为高阶函数。
@@ -262,3 +332,129 @@ def func(param: List[T]) -> T:
 ```
 
 TypeVar可以添加限制。
+
+#### TypedDict
+
+允许开发者定义字典的结构，推荐使用类定义语法。
+
+与NamedTuple相比，TypedDict键值可变，无需创建新的示例。
+
+与dataclass相比，TypedDict更适合处理JSON/字典数据，dataclass提供了更多面相对象的特性。
+
+```python
+from typing import TypedDict
+
+class User(TypedDict):
+    name: str
+    age: int
+    email: str
+```
+
+**所有键默认设为可选**
+
+```python
+class Employee(TypedDict, total=False):
+    # 只影响在类中定义的键，不影响继承键
+    name: str # 可选键
+    age: int # 可选键
+    email: str # 可选键
+    salary: float # 必选键
+
+# 创建只包含部分键的字典也合法
+my_employee: Employee = {
+    "name": "John"
+    "age": 25
+}
+```
+
+**限定特定键**
+
+```python
+from typing import TypedDict, NotRequired, Required
+
+class Project(TypedDict, total=False):
+    name: Required[str] # 显示标记为必需
+    description: str # 默认为可选 (total=False)
+    deadline: NotRequired[str] # 显示标记为可选
+```
+
+**继承TypedDict**
+
+```python
+from typing import TypedDict
+
+class PersonBase(TypedDict):
+    name: str
+    age: int
+
+class Employee(PersonBase, total=False):
+    salary: float
+    department: str
+
+my_employee: Employee = {
+    "name": "John",
+    "age": 25,
+    "salary": 100000
+}
+```
+
+**组合TypedDict**
+
+```python
+from typing import TypedDict
+
+class Address(TypedDict):
+    street: str
+    city: str
+    state: str
+
+class Contact(TypedDict):
+    phone: str
+    email: str
+
+class Person(TypedDict):
+    name: str
+    address: Address # 组合TypedDict
+    contact: Contact # 组合TypedDict
+
+# 使用组合TypedDict
+person: Person = {
+    "name": "John",
+    "address": {
+        "street": "123 Main St",
+        "city": "Anytown",
+        "state": "CA"
+    },
+    "contact": {
+        "phone": "(555) 555-5555",
+        "email": "john@example.com"
+    }
+}
+```
+
+**类型合并**
+
+```python
+from typing import TypedDict
+
+class UserBase(TypedDict):
+    id: int
+    name: str
+
+class UserContact(TypedDict):
+    email: str
+    phone: str
+
+# 合并两个TypedDict
+class UserProfile(UserBase, UserContact):
+    age: int
+    address: str
+
+user: UserProfile = {
+    "id": 1,
+    "name": "John",
+    "age": 25,
+    "address": "123 Main St",
+    "email": "john@example.com",
+    "phone": "(555) 555-5555"
+}
