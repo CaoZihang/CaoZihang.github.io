@@ -27,6 +27,9 @@ def func(*args):
     for arg in args:
         pass
 
+# 元组自动打包
+coordinates = x, y
+
 # 关键字参数拆包
 def func(**kwargs):
     for key, value in kwargs.items():
@@ -294,6 +297,71 @@ def process_command(command):
 
 模式匹配的内存使用略高于简单条件句，因此对于复杂的模式推荐使用if-else。
 
+### 迭代
+可迭代对象Iterable是指实现了__iter__()方法的对象。
+
+迭代器Iterator是指实现了__iter__()和__next__()方法的对象。
+
+迭代器通过__next__()方法逐个返回序列中的元素，当没有更多元素时抛出`StopIteration`异常。
+
+迭代对象支持多次迭代，迭代器一旦迭代完成即耗尽。
+
+迭代器维护迭代状态，记录当前遍历位置。
+
+迭代对象可以通过调用iter(记录当前遍历位置。
+
+迭代对象可以通过调用`iter()`方法转换为迭代器。
+
+```python
+from collection.abc import Iterable, Iterator
+
+print(isinstance([1, 2, 3], Iterable)) # True
+print(isinstance([1, 2, 3], Iterator)) # False
+
+my_iterator = iter([1, 2, 3])
+print(next(my_iterator))
+my_iterator = iter([1, 2, 3])
+print(next(my_iterator))
+```
+
+#### 特殊迭代器
+
+`itertools`提供了几个特殊迭代器：`cycle`, `islice`, `chain`。
+
+`cycle`会将可迭代对象无限循环。
+
+```python
+from itertools import cycle
+
+colors = cycle(["red", "green", "blue"])
+
+for _ in range(10):
+    print(next(colors)) # red green blue red green blue red green blue red
+```
+
+`islice`类似于`slice`，可用于任何迭代器，返回的是新的迭代器。
+
+```python
+from itertools import islice
+
+sliced = itertools.islice(range(10), 3, 6)
+
+for i in sliced:
+    print(i)
+```
+
+`chain`可以将多个可迭代对象串连起来，形成新的迭代器。
+
+```python
+from itertools import chain
+
+iterable = chain(range(3), range(5, 8), other_iterable)
+```
+
+多线程环境下使用迭代器需要特别注意。
+
+长期运行的迭代器可能导致内存泄漏问题。
+
 ## 类型提示
 
 > “小型程序，动态类型就够了，而大型程序则需要更规范的方式。” —— Fluent Python
@@ -458,3 +526,165 @@ user: UserProfile = {
     "email": "john@example.com",
     "phone": "(555) 555-5555"
 }
+```
+
+## 日志系统
+
+Python标准库`logging`模块提供了非常强大的日志记录功能。
+
+该模块包含Logger日志记录器，Handler日志处理器，Filter日志过滤器，Formatter日志格式化器。
+
+### Logger
+
+支持层次结构，通过点号分割创建父子关系（如app.ui）。
+
+提供不同级别的日志记录方法，如debug，info，warn，error等。
+
+可以同时像多个目标输出日志。
+
+```python
+# 创建日志记录器
+root_logger = logging.getLogger() # 创建根日志记录器 (默认存在)
+app_logger = logging.getLogger("app") # 创建具有名字的日志记录器（推荐）
+named_logger = logging.getLogger(__name__) # 创建与模块同名的日志记录器
+
+# 创建层次化日志记录器，通过.分隔层级)
+logger = logging.getLogger('app.ui.me')
+# 通过logging.getLogger('app').getChild('ui.me')返回子记录器
+# 通过logging.getLogger('app').getChildren()获得所有(直接)次级记录器名称
+
+# 设定日记记录器阈值级别，当记录低于阈值时不作处理，高于阈值则调用处理函数
+logger.setLevel(logging.DEBUG)
+# 子记录器默认继承父记录器的阈值
+
+# 日志记录（从低到高排序）
+logger.debug("debug message")
+logger.info("info message")
+logger.warning("warning message")
+logger.error("error message")
+logger.critical("critical message")
+
+# 为日志记录添加额外上下文信息
+extra = {'user_id': '123', 'ip': '127.0.0.1'}
+logger.info('用户操作', extra=extra)
+```
+
+### Handler
+
+常用的处理器：
+
+- FileHandler：将日志记录写入文件
+- StreamHandler：将日志记录输出到标准输出
+- RotatingFileHandler：将日志记录写入文件，当文件达到一定大小时，自动创建新的日志文件，并删除旧的
+- SMTPHandler：将日志记录发送到邮件服务器
+- SysLogHandler：将日志记录发送到系统日志
+
+每个Handler都可以有自己的日志级别和格式化器。
+
+```python
+# 文件处理器
+file_handler = logging.FileHandler('app.log')
+file_handler.setLevel(logging.DEBUG)
+
+# 标准输出处理器
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+
+# 轮转文件处理器
+rotating_handler = RotatingFileHandler(
+    'app.log',
+    maxBytes = 1024 * 1024, # 文件大小上限 1MB
+    # 超过此大小时，自动创建新的日志文件
+    backupCount = 5 # 保留5个日志文件，超出的自动删除
+)
+
+# 邮件处理器
+smtp_handler = SMTPHandler(
+    mailhost=('smtp.example.com', 587),
+    fromaddr='logger@example.com',
+    toaddrs=['admin@example.com'],
+    subject='日志告警',
+    credentials=('username', 'password')
+)
+smtp_handler.setLevel(logging.ERROR)
+```
+
+### Filter
+
+可以基于日志记录的属性（如模块名，函数名）、自定义业务逻辑、特定日志模式过滤日志。
+
+```python
+class UserFilter(logging.Filter):
+    """只记录特定用户的日志"""
+    def __init__(self, user_id):
+        super().__init__()
+        self.user_id = user_id
+
+    def filter(self, record):
+        if not hasattr(record, 'user_id'): return True
+        return record.user_id == self.user_id
+
+class SensitiveFilter(logging.Filter):
+    """过滤敏感信息"""
+    def filter(self, record):
+        sensitive_words = ['password', 'secret']
+        return not any(word in record.getMessage().lower() for word in sensitive_words)
+
+logger.addFilter(UserFilter('123'))
+logger.addFilter(SensitiveFilter())
+logger.addFilter(UserFilter('123'))
+logger.addFilter(SensitiveFilter())
+```
+
+### Formatter
+
+常用的格式化属性：
+
+- %(asctime)s:时间戳
+- %(name)s:日志记录器名称
+- %(levelname)s:日志级别
+- %(message)s:日志消息
+- %(pathname)s:完整路径名
+- %(filename)s:文件名
+- %(module)s:模块名
+- %(funcName)s:函数名
+- %(lineno)d:行号
+- %(process)d:进程ID
+- %(thread)d:线程ID
+
+```python
+# 创建格式化器
+basic_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'basic_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+# JSON格式化器
+class JsonFormatter(logging.Formatter):
+    def format(self, record):
+        return json.dumps({
+            'timestamp': self.formatTime(record),
+            'level': record.levelname,
+            'logger': record.name,
+            'message': record.getMessage()class JsonFormatter(logging.Formatter):
+        })
+
+# 应用格式化器
+file_handler.setFormatter(basic_formatter)
+```
+
+### 自定义日志级别
+
+- DEBUG 10
+- INFO 20
+- WARNING 30
+- ERROR 40
+- CRITICAL 50
+
+```python
+定义介于INFO和WARNING之间的日志级别
+TRACE_LEVEL = 25
+logging.addLevelName(TRACE_LEVEL, 'TRACE')
+
+def trace(self, message, *args, **kws):
+    self.log(TRACE_LEVEL, message, *args, **kws)
+
+logging.Logger.trace = trace
+```
