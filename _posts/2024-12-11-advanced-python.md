@@ -13,6 +13,8 @@ tags:
 
 {:toc}
 
+> 整理自be better coder微信公众号与Fluent Python, Second Edition。
+
 ## 数据处理
 ### \*拆包与强制关键字参数
 #### 拆包
@@ -54,13 +56,82 @@ def func(a, b, *, c):
 func(1, 2, c=3)
 ```
 
-### 推导式与生成式
-列表推导式通常更快，生成式在处理大数据时更节省内存。
+### 推导式与生成器
+列表推导式通常更快，生成器在处理大数据时更节省内存。
 
 ```python
 [x * 2 for x in list] # 列表推导式更快
-(x * 2 for x in list) # 生成式节省内存
+(x * 2 for x in list) # 生成器节省内存
 ```
+
+#### 生成器
+
+```python
+# 生成器函数
+def gen_func():
+    yield 1
+
+# 生成器表达式
+gen_expr = (x for x in range(10))
+
+# 通过可迭代对象转换成生成器
+```
+
+**生成器作为上下文管理器**
+
+```python
+from contextlib import contextmanager
+
+@contextmanager # 该装饰器允许with语句使用该生成器
+def file_manager(file_path):
+    try:
+        f = open(file_path, 'r')
+        yield f
+    finally:
+        f.close()
+
+with file_manager("file.txt") as f:
+    content = f.read()
+```
+
+**接收外部数据**
+
+```python
+def counter():
+    i = 0
+    while True:
+        val = (yield i)
+        if val is not None:
+            i = val
+        else:
+            i += 1
+
+c = counter()
+print(next(c)) # 0
+# send会取代yield的值
+print(c.send(10)) # 10
+print(next(c)) # 11
+```
+
+**子生成器**
+
+```python
+def sub_generator():
+    yield 1
+    yield 2
+    yield 3
+
+def main_generator():
+    yield 'a'
+    # 委托给子生成器
+    yield from sub_generator()
+    yield 'b'
+
+for item in main_generator():
+    print(item) # a, 1, 2, 3, b
+```
+
+生成器可用于大文件、大数据处理。
 
 ### 枚举enum
 python中，枚举enum时一种特殊类，它提供了一种将一组相关常量定义为一个单一类型的方式。
@@ -160,6 +231,62 @@ if Permission.READ in user_permission: ...
 ```
 
 枚举常用于配置管理、状态机、数据库模型。
+
+### with上下文管理
+
+上下文管理器基于__enter__()和__exit__(exc_type, exc_value, traceback)两个特殊方法。
+
+当执行`with`语句时，Python解释器会调用上下文管理器的`__enter__()`方法，将`__enter__()`方法的返回值赋值给`as`子句的变量，之后执行`with`语句体中的代码，最后调用上下文管理器的`__exit__()`方法。
+
+上下文管理器常用于文件操作，数据库，网络，线程锁，临时目录操作，计时器，环境变量修改等。
+
+#### 自定义上下文管理器
+
+```python
+# 基于类的实现
+class MyContextManager:
+    def __init__(self, name):
+        self.name = name
+
+    def __enter__(self):
+        print(f"Entering context: {self.name}")
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        print(f"Exiting context: {self.name}")
+        if exc_type:
+            print(f"Exception: {exc_type}, {exc_value}")
+        return False
+
+# 基于装饰器的实现
+from contextlib import contextmanager
+
+@contextmanager
+def my_context_manager(name):
+    print(f"Entering context: {name}")
+    try:
+        yield
+    finally:
+        print(f"Exiting context: {name}")
+```
+
+`contextlib`模块提供了多个上下文管理相关的工具：
+- `@contextmanager`装饰器，用于创建上下文管理器
+- `closing()`自动调用对象的close()方法
+- `suppress()`忽略特定异常
+- `ExitStack`动态管理一组上下文管理器
+
+```python
+from contextlib import contextmanager
+
+def process_files(file_list):
+    with ExitStack() as stack:
+        files = [stack.enter_context(open(file_name)) for file_name in file_list]
+        # 所有的文件都打开
+        for file in files:
+            print(file.read())
+        # 退出with语句后，所有文件会自动关闭
+```
 
 ## 函数
 ### 高阶函数
@@ -361,6 +488,133 @@ iterable = chain(range(3), range(5, 8), other_iterable)
 多线程环境下使用迭代器需要特别注意。
 
 长期运行的迭代器可能导致内存泄漏问题。
+
+### 包和模块管理
+
+3.3+版本后，python现代包结构不再强制要求`__init__.py`。
+
+`__init__.py`用于包级别初始化、控制导入等功能。
+
+```Python
+# package/__init__.py
+
+# 定义包相关变量
+__version__ = "1.0"
+__name__ = "package"
+
+# 提供包的显示索引
+# 用于引入包时，from package import *导入的模块
+__all__ = ["func1", "func2"]
+
+from .module1 import func1
+from .module2 import func2
+
+# 包初始化
+# 在import包时执行
+
+def init():
+    pass
+
+init()
+```
+
+#### 动态导入模块
+
+即基于代码，在程序运行中导入模块。
+
+```python
+import importlib
+
+module = importlib.import_module("module_name")
+```
+
+### 状态机
+状态机（亦称有限状态机，Finite State Machine, FSM）用于处理对象在不同状态下切换。
+
+状态机包含3个核心要素：
+- 状态State
+- 事件Event：触发状态转换的条件
+- 转换Transition: 从一个状态到另一个状态的过程
+
+> Moore状态机：输出只依赖当前状态。
+
+> Mealy状态机：输出依赖当前状态和输入。
+
+e.g.订单状态机
+
+```python
+from enum import Enum
+from typing import Dict, List, Optional
+
+class OrderState(Enum):
+    """订单状态枚举类"""
+    CREATED = "created"
+    PAID = "paid"
+    SHIPPED = "shipped"
+    DELIVERED = "delivered"
+    CANCELLED = "cancelled"
+
+class OrderStateMachine:
+    """
+    订单状态机
+    负责管理订单在不同状态之间的转换
+    """
+    def __init__(self) -> None:
+        # 状态转换规则表
+        self.state_transitions: Dict[OrderState, List[OrderState]] = {
+            OrderState.CREATED: [OrderState.PAID, OrderState.CANCELLED],
+            OrderState.PAID: [OrderState.SHIPPED, OrderState.CANCELLED],
+            OrderState.SHIPPED: [OrderState.DELIVERED],
+            OrderState.DELIVERED: [],
+            OrderState.CANCELLED: []
+        }
+        # 初始化状态
+        self.current_state = OrderState.CREATED
+
+    def transition_check(self, target_state: OrderState) -> bool:
+        """检查状态转换是否合法"""
+        return target_state in self.state_transitions[self.current_state]
+
+    def transition(self, target_state: OrderState) -> bool:
+        if self.transition_check(target_state):
+            # 可以添加钩子函数对业务逻辑进行验证，before_transition
+            self.current_state = target_state
+            # 钩子函数after_transition
+            print(f"{self.current_state} -> {target_state}"))
+            return True
+        else:
+            print(f"{self.current_state} -x-> {target_state} is invalid")
+            return False
+
+# 使用状态机
+order = OrderStateMachine()
+order.transition(OrderState.PAID) # 成功：created -> paid
+order.transition(OrderState.SHIPPED) # 成功：paid -> shipped
+order.transition(OrderState.CANCELLED) # 失败：shipped -x-> delivered
+order.transition(OrderState.DELIVERED) # 成功：shipped -> delivered
+```
+
+实践经验：
+
+- 清晰定义状态
+- 配置状态转换规则
+- 异常处理
+- 状态测试
+- 日志记录
+
+### 异步编程
+
+Python提供3种协程：原生协程async def、经典协程yield、基于生成器的协程@types.coroutine
+
+最主流的是由asyncio模块支持的原生协程。
+
+**事件循环Event Loop**负责管理异步任务的调度和执行。
+
+**协程Coroutine**是一种可以暂定和恢复的函数。通过`async def`定义协程函数，在执行过程中使用`await`挂起。
+
+协程比线程更加轻量级，开销更低，在大规模并发场景下表现更好。
+
+**任务Task**是封装协程的执行，通过`asyncio.create_task`创建。
 
 ## 类型提示
 
