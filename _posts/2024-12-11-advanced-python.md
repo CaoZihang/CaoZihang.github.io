@@ -13,7 +13,7 @@ tags:
 
 {:toc}
 
-> 整理自be better coder微信公众号与Fluent Python, Second Edition。
+> 整理自be better coder微信公众号、Fluent Python, Second Edition与码农高天。
 
 ## 数据处理
 ### \*拆包与强制关键字参数
@@ -234,7 +234,7 @@ if Permission.READ in user_permission: ...
 
 ### with上下文管理
 
-上下文管理器基于__enter__()和__exit__(exc_type, exc_value, traceback)两个特殊方法。
+上下文管理器基于`__enter__()`和`__exit__(exc_type, exc_value, traceback)`两个特殊方法。
 
 当执行`with`语句时，Python解释器会调用上下文管理器的`__enter__()`方法，将`__enter__()`方法的返回值赋值给`as`子句的变量，之后执行`with`语句体中的代码，最后调用上下文管理器的`__exit__()`方法。
 
@@ -287,6 +287,194 @@ def process_files(file_list):
             print(file.read())
         # 退出with语句后，所有文件会自动关闭
 ```
+
+### 高效Pandas
+#### 数据读取
+```python
+# 优化读取
+df = pd.read_csv('data.csv',
+    usecols=['A', 'B', 'C'], # 读取指定列
+    dtype={'A': int, 'B': float}, # 指定列的数据类型
+    nrows=10000, # 限制读取行数
+    parse_dates=['date'], # 将指定列转换为日期类型
+)
+
+# 分块读取大文件
+chunks = pd.read_csv('data.csv', chunksize=10000)
+# 对每个块进行处理并合并
+result = pd.DataFrame()
+for chunk in chunks:
+    processed_chunk = process(chunk)
+    result = pd.concat([result, processed_chunk])
+
+# 并行读取多个文件
+from concurrent.futures import ThreadPoolExecutor
+
+def read_file(file_path):
+    return pd.read_csv(file_path)
+
+files = ['file1.csv', 'file2.csv', 'file3.csv']
+with ThreadPoolExecutor(max_workers=3) as executor:
+    dfs = list(executor.map(read_file, files))
+
+# 使用专门格式加快读取速度
+df = pd.read_parquet('data.parquet') # parquet格式读取更快
+df = pd.read_feather('data.feather') # Feather格式更适合 pandas
+
+# 基于SQL引擎读取数据库
+from sqlalchemy import create_engine
+engine = create_engine('sqlite:///data.db')
+df = pd.read_sql('SELECT * FROM table', engine)
+```
+
+#### 数据筛选
+```python
+# 使用query进行复杂条件筛选
+df.query("age > 18 and gender == 'M'")
+
+# isin过滤
+cities = ['New York', 'Los Angeles', 'Chicago']
+df[df['city'].isin(cities)]
+
+# 组合条件
+mask1 = df['age'] > 18
+mask2 = df['gender'] == 'M'
+df[mask1 & mask2]
+
+# between范围筛选
+df[df['age'].between(18, 30)]
+
+# 模糊匹配
+df[df['city'].str.contains('New', na=False)]
+```
+
+#### 数据清洗
+```python
+# 数据类型转换
+df['data'] = df['data'].astype('category') # category类型节省内存
+df['data'] = pd.to_datetime(df['data'], format='%Y-%m-%d', errors='coerce')
+
+# 批量替换值
+mapping = {'男': 1, '女': 0, 'N/A': -1}
+df['gender'] = df['gender'].map(mapping)
+
+# 填充缺失值
+df['data'] = df['data'].fillna({
+    'age': df['age'].mean(),
+    'gender': 'N/A',
+    'income': df['income'].median()',
+    'city': df['city'].mode()[0] # 取众数
+})
+
+# 删除重复数据
+df = df.drop_duplicates(subset=['name', 'age'], keep='first')
+
+# 异常值
+def remove_outlier(series):
+    Q1 = series.quantile(0.25)
+    Q3 = series.quantile(0.75)
+    IQR = Q3 - Q1
+    return series[~((series < (Q1 - 1.5 * IQR)) | (series > (Q3 + 1.5 * IQR)))]
+
+df['income'] = remove_outlier(df['income'])
+```
+
+#### 分组
+
+```python
+def top_n_mean(x, n=3):
+    return x.nlargest(n).mean()
+
+result = df.groupby(['city', 'gender']).agg({
+    'age': ['count', 'mean', 'median', 'std', top_n_mean],
+    'income': 'sum',
+}).round(2)
+
+df['salary'] = df.groupby('city').transform(lambda x: x.mean())
+df['salary'] = df.groupby('department')['salary'].rank(method='dense')
+```
+
+### 魔术方法
+
+- `__new__`建立对象时触发，需要返回obj，使用不多
+- `__del__`释放对象，不太好用
+  - 与`del obj`不同，`del`是停止引用，不触发`__del__`
+
+- `__str__`人类更可读，通常是简略版本，print会优先调用
+- `__repr__`通常信息比较全面
+- `__format__`使用频率很低，用于打印时处理format
+
+- `__eq__`通常返回bool型，但其实可以返回任意值；没有实现的话默认使用`is`比较
+  - 在没有定义`__ne__`的情况下，`!=`运算默认会对`__eq__`取反
+- `__gt__`和`__lt__`当一个缺乏定义时会调用另一个取反
+  - 调用`__gt__`或`__lt__`并不是由`>`或`<`决定的
+  - 若两个比较对象A，B不是由同一个类定义的
+    - 默认优先调用左边对象拥有的比较方法rich comparison
+    - 若B是A的衍生类定义的，则优先调用B的比较方法
+- python中`>=`与`> and =`不等价，需要单独定义`__ge__`和`__le__`
+- python对每个自定义的数据结构都默认了`__eq__`和`__hash__`
+  - 当自定义了`__eq__`，默认`__hash__`就会被自动注释，导致unhashable错误
+  - `__hash__`要求若两个对象相等，它们的哈希值也必须相等，修改`__eq__`后默认的`__hash__`就不成立了
+  - `__hash__`必须返回一个整数，且相等对象hash必须相等
+
+- `__bool__`所有自定义对象的bool都默认若`__len__ !=0`为True，除非修改`__bool__`
+
+- `__getattr__`当调用不存在属性时执行的内容，默认`raise AttributeError`
+- `__getattribute__`当读取任意属性时触发（无论是否存在）
+  - 需要返回默认操作时，应`return super().__getattribute__(name)`避免无限递归
+  - 注意，每一次读取属性都会调用，很容易产生无限递归问题
+- `__setattr__`写属性，通常会通过`super().__setattr(name, val)`来保持默认行为
+- `__delattr__`尝试删除Object属性时才会调用
+
+- `__dir__`可以自定义返回内容
+
+描述器是一个实现了描述器协议的类，它允许自定义对象属性的访问方式。
+
+只要实现了`__get__`、`__set__`、`__delete__`方法之一，就可以成为描述器。
+
+实现了`__get__`和`__set__`方法的描述器可以称为数据描述器，它对属性的读写都有完全控制权。
+
+数据描述器的优先级较高，会覆盖实例字典中的同名属性。
+
+```Python
+class DataDescriptor:
+    def __get__(self, obj, objtype=None):
+        # obj为使用描述器的对象
+        return self.value
+
+    def __set__(self, obj, value):
+        # 添加一些验证逻辑
+        if not isinstance(value, int):
+            raise TypeError("Value must be an integer")
+        self._value = value
+
+class A:
+    x = DataDescriptor()
+```
+
+非数据描述器只实现了`__get__`方法，只能控制属性的读取操作，它的优先级较低，若实例字典中存在同名属性，则会优先使用实例字典中的属性
+raise TypeError("Value must be an integer")
+        self._value = value
+
+，它的优先级较低，若实例字典中存在同名属性，则会优先使用实例字典中的属性。
+
+- `__get__`当获取属性时调用
+- `__set__`当设置属性时调用
+- `__delete__`当删除属性时调用
+- `__set_name__(self, owner, name)`创建类时调用，用于获取描述器在类中的名称
+
+- `__slots__`非魔术方法，但具有特殊含义，类似于白名单机制，指明对象可以自定义的属性。
+
+- `__init_subclass__(cls)`用于基类，创建衍生类时自动初始化
+
+- `__call__`像函数一样使用对象
+- `__getitem__`方括弧索引读取值
+- `__setitem__`方括弧索引设置值
+- `__delitem__`del删除值
+- `__reversed__` reversed内置函数调用
+- `__contains__` in内置函数调用
+
+- `__missing__`仅适用于继承dict的衍生类，当键不存在时的操作
 
 ## 函数
 ### 高阶函数
@@ -387,6 +575,76 @@ def example():
     """This is an example function."""
     print("example() is called")
 ```
+
+### 闭包
+
+#### 变量作用域与global
+
+在函数中赋值时，如果希望把变量作为全局变量，修改全局变量的值，需要使用global声明。
+
+```python
+b = 6
+def foo(a):
+    global b
+    print(a)
+    print(b) # 声明global后可以正常执行
+    b = 9
+```
+
+#### 闭包
+
+闭包就是延伸了作用域的函数，包括函数主体中引用的非全局变量和局部变量，这些变量必须来自包含该函数的外部函数和局部作用域。
+
+内部函数可以访问外部函数的局部变量，在内部作为自由变量与其绑定。
+
+但是，当变量是数值或其他不可变类型，对其进行操作实质上会隐式创建局部变量，导致器不再是自由变量保留在闭包中。
+
+对这类变量需要使用`nonlocal`关键字将变量标记为自由变量。
+
+```python
+def make_average(x):
+    series = [x]
+    count = 0
+    total = x
+
+    def average(new_value):
+        nonlocal count, total
+        count += 1
+        total += new_value
+        series.append(new_value)
+        return total / count
+
+    return average
+
+avg = make_average(100)
+avg(10)
+avg(20)
+```
+
+包含多个方法
+
+```python
+def create_counter():
+    count = 0
+
+    def increment():
+        nonlocal count
+        count += 1
+        return count
+
+    def get_count():
+        return count
+
+    return {
+        "increment": increment,
+        "get_count": get_count
+    }
+
+counter = create_counter()
+print(counter["increment"]())
+print(counter["get_count"]())
+```
+
 ## 控制流
 ### 模式匹配match-case
 与if-else相比，模式匹配除了能匹配简单数据类型外，还可以根据复杂数据结构进行匹配。
@@ -604,17 +862,144 @@ order.transition(OrderState.DELIVERED) # 成功：shipped -> delivered
 
 ### 异步编程
 
+异步编程不影响计算速度，是在调度上的优化。
+
+协程比线程更加轻量级，开销更低，在大规模并发场景下表现更好。
+
 Python提供3种协程：原生协程async def、经典协程yield、基于生成器的协程@types.coroutine
 
 最主流的是由asyncio模块支持的原生协程。
 
-**事件循环Event Loop**负责管理异步任务的调度和执行。
+**事件循环Event Loop**负责管理异步任务的调度和执行，代码上可以视作`while True`，是异步的核心。
 
 **协程Coroutine**是一种可以暂定和恢复的函数。通过`async def`定义协程函数，在执行过程中使用`await`挂起。
 
-协程比线程更加轻量级，开销更低，在大规模并发场景下表现更好。
+`async def`创建的是一个Coroutine Object，需要进入异步模式(即托管给Event Loop)，并封装成Task才能运行。
 
 **任务Task**是封装协程的执行，通过`asyncio.create_task`创建。
+
+`await`也可以将协程变成Task，但它会导致所有Event Loop的控制权都是显式指定的，无法调度，必须等待await交回控制权。
+
+```python
+import asyncio
+
+# 定义一个协程函数
+async def coroutine_func():
+    print("Hello World!")
+    await asyncio.sleep(1)
+    print("Goodbye World!")
+
+async def coroutine_func_2():
+    # 使用await 将其他协程函数变成Task，不能发挥协程优势
+    print("Hello World!")
+    await coroutine_func()
+    await coroutine_func()
+    print("Goodbye World!")
+
+async def coroutine_fun_2_real():
+    # 使用create_task，可以发挥协程优势
+    task1 = asyncio.create_task(coroutine_func())
+    task2 = asyncio.create_task(coroutine_func())
+    print("Hello World!")
+    # await的对象是task，不会抢夺Event Loop的控制权
+    return1 = await task1 # 获取协程函数的返回值
+    await task2
+    print("Goodbye World!")
+
+async def coroutine_fun_2_real_clean():
+    # 使用gather简化代码
+    # gather可以同时注册多个任务，并获取返回值
+    # gather可以接收Task和Coroutine Object，它会自动将协程函数封装成Task
+    print("Hello World!")
+    # 返回值是一个列表
+    return1 = await asyncio.gather(coroutine_func(), coroutine_func())
+    print("Goodbye World!")
+
+# 异步模式入口函数asyncio.run(coroutine)
+asyncio.run(coroutine_fun_2())
+# asyncio.run会自动将运行的协程封装成Task，并运行
+```
+
+#### Asyncio.Queue
+
+生产者-消费者模式是用于解决两个或多个实体（线程、协程等）之间的数据共享和协作问题。
+
+生产者主要是生产数据，消费者对生产者提供的数据进行处理。
+
+生产者和消费者之间需要一个数据存储缓冲区，它在一定程度上容纳生产者生产的数据，避免由生产者和消费者速度不匹配导致的数据丢失或堵塞。
+
+`asyncio.Queue`主要用于协调多个协程之间的数据流动和任务分发，常用于生产者-消费者模式。
+
+`asyncio.Queue`具有流量控制机制和任务同步的功能。
+
+```Python
+async def producer_consumer_task():
+    queue = asyncio.Queue(maxsize=5)
+
+    # 生产者
+    async def producer():
+        for i in range(10):
+            await queue.put(f"item{i}")
+            print(f"producer put item{i}")
+            await asyncio.sleep(1)
+
+    async def consumer():
+        while True:
+            item = await queue.get()
+            print(f"consumer get item{item}")
+            queue.task_done()
+            await asyncio.sleep(1)
+
+    producer_task = asyncio.create_task(producer())
+    consumer_task = asyncio.create_task(consumer())
+
+    # 等待生产者任务完成
+    await producer_task
+    # 等待队列处理完成
+    await queue.join()
+    # 取消消费者
+    consumer_task.cancel()
+```
+
+#### 异步迭代器
+
+异步迭代器Async Iterator需要实现`__aiter__()`和`__anext__()`方法。
+
+`__aiter__()`返回异步迭代器对象本身return self`，无需是异步方法
+
+异步迭代器需要实现`__aiter__()`和`__anext__()`方法。
+
+`__aiter__()`返回异步迭代器对象本身`return self`，无需是异步方法
+
+`__anext__()`必须是异步方法，返回序列中的下一个值，当没有更多元素时抛出`StopAsyncIteration`异常。
+
+```python
+class AsyncDataFetcher:
+    def __init__(self, data_source):
+        self.data_source = data_source
+        self.index = 0
+
+    def __aiter__(self):
+        return self
+
+    async def __anext__(self):
+        if self.index < len(self.data_source):
+            raise StopAsyncIteration
+        await asyncio.sleep(1) # 模拟异步操作
+        self.index += 1
+        return self.data_source[self.index - 1]
+
+async def main():
+    # 异步循环，async for必须在协程中使用
+    async for item in AsyncDataFetcher([1, 2, 3, 4, 5]):
+        print(item)
+
+asyncio.run(main())
+```
+
+异步可迭代对象Async Iterable只需要实现`__aiter__()`方法，该方法返回一个异步迭代器。
+
+异步可迭代对象可以迭代多次，每次获取新的迭代器。
 
 ## 类型提示
 
