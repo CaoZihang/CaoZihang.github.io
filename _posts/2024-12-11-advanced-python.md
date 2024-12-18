@@ -56,6 +56,15 @@ def func(a, b, *, c):
 func(1, 2, c=3)
 ```
 
+### 海象运算符
+即赋值表达式，允许在表达式内部进行变量赋值。
+
+```python
+if (n := func(x)) > 10:
+    # 无需单独创建n=func(x)
+    print(n)
+```
+
 ### 推导式与生成器
 列表推导式通常更快，生成器在处理大数据时更节省内存。
 
@@ -476,6 +485,13 @@ raise TypeError("Value must be an integer")
 
 - `__missing__`仅适用于继承dict的衍生类，当键不存在时的操作
 
+### NumPy
+#### 读取数据
+
+- `np.genfromtxt('file.csv', dtype='float' ,delimiter=',', skip_header=1, usecols=(1, 2, 3), encoding='utf-8', missing_values=['NA', ''], filling_values=0)
+  - 用于读取csv
+- `np.loadtxt('data.txt')读取文本文件，默认按空格分隔
+
 ## 函数
 ### 高阶函数
 接受函数作为参数，或把函数作为结果返回的函数即为高阶函数。
@@ -643,6 +659,233 @@ def create_counter():
 counter = create_counter()
 print(counter["increment"]())
 print(counter["get_count"]())
+```
+
+## 类
+### 抽象基类ABC
+
+抽象基类主要用于定义接口规范。
+
+`@abstractmethod`抽象方法装饰器，用于标记必须被子类实现的方法，且子类实现该抽象方法时，方法的名称和参数必须与抽象方法定义完全一致。
+
+`register()`方法将类注册为抽象基类的虚拟子类进行类型检查，且该类无需显式地继承抽象基类。
+
+```python
+from abc import ABC, abstractmethod
+
+class Vehicle(ABC):
+    # 抽象方法
+    @abstractmethod
+    def move(self):
+        pass
+
+    # 抽象属性
+    @property # 将方法声明为属性
+    @abstractmethod
+    def wheels(self):
+        pass
+
+@Vehicle.register
+class Car:
+    def move(self):
+        return "Car is moving"
+
+    @property
+    def wheels(self):
+        return 4
+
+# 检查类型关系
+print(issubclass(Car, Vehicle)) # True
+print(isinstance(Car(), Vehicle)) # True
+```
+
+abc模块是通过元类metaclass实现抽象基类的。
+
+### 元类metaclass
+
+元类就是类的类（工厂），它定义了创建类时的规则。
+
+当使用`class`关键字定义类的时候，python会使用默认元类（`type`）来创建类，当使用自定义元类时，元类会接管创建类和`type`之间的过程。
+
+元类通常会重写`type`默认元类的`__new__`（类创建时调用）、`__init__`（类创建后初始化）、`__call__`（实例化时调用）三个魔术方法。
+
+```Python
+class MyMeta(type):
+    def __new__(cls, name, bases, attrs):
+        if 'required_method' not in attrs:
+            raise TypeError('Missing required method')
+        return super().__new__(cls, name, bases, attrs)
+
+    def __init__(cls, name, bases, attrs):
+        super().__init__(name, bases, attrs)
+        # 为创建的类添加一个属性，记录创建时间
+        cls.created_at = datetime.now()
+
+    def __call__(cls, *args, **kwargs):
+        print("Calling", cls.__name__)
+        return super().__call__(*args, **kwargs)
+
+class A(metaclass=MyMeta):
+    pass
+
+obj = A()
+```
+
+### TypedDict
+
+允许开发者定义字典的结构，推荐使用类定义语法。
+
+与NamedTuple相比，TypedDict键值可变，无需创建新的示例。
+
+与dataclass相比，TypedDict更适合处理JSON/字典数据，dataclass提供了更多面相对象的特性。
+
+```python
+from typing import TypedDict
+
+class User(TypedDict):
+    name: str
+    age: int
+    email: str
+```
+
+**所有键默认设为可选**
+
+```python
+class Employee(TypedDict, total=False):
+    # 只影响在类中定义的键，不影响继承键
+    name: str # 可选键
+    age: int # 可选键
+    email: str # 可选键
+    salary: float # 必选键
+
+# 创建只包含部分键的字典也合法
+my_employee: Employee = {
+    "name": "John"
+    "age": 25
+}
+```
+
+**限定特定键**
+
+```python
+from typing import TypedDict, NotRequired, Required
+
+class Project(TypedDict, total=False):
+    name: Required[str] # 显示标记为必需
+    description: str # 默认为可选 (total=False)
+    deadline: NotRequired[str] # 显示标记为可选
+```
+
+**继承TypedDict**
+
+```python
+from typing import TypedDict
+
+class PersonBase(TypedDict):
+    name: str
+    age: int
+
+class Employee(PersonBase, total=False):
+    salary: float
+    department: str
+
+my_employee: Employee = {
+    "name": "John",
+    "age": 25,
+    "salary": 100000
+}
+```
+
+**组合TypedDict**
+
+```python
+from typing import TypedDict
+
+class Address(TypedDict):
+    street: str
+    city: str
+    state: str
+
+class Contact(TypedDict):
+    phone: str
+    email: str
+
+class Person(TypedDict):
+    name: str
+    address: Address # 组合TypedDict
+    contact: Contact # 组合TypedDict
+
+# 使用组合TypedDict
+person: Person = {
+    "name": "John",
+    "address": {
+        "street": "123 Main St",
+        "city": "Anytown",
+        "state": "CA"
+    },
+    "contact": {
+        "phone": "(555) 555-5555",
+        "email": "john@example.com"
+    }
+}
+```
+
+**类型合并**
+
+```python
+from typing import TypedDict
+
+class UserBase(TypedDict):
+    id: int
+    name: str
+
+class UserContact(TypedDict):
+    email: str
+    phone: str
+
+# 合并两个TypedDict
+class UserProfile(UserBase, UserContact):
+    age: int
+    address: str
+
+user: UserProfile = {
+    "id": 1,
+    "name": "John",
+    "age": 25,
+    "address": "123 Main St",
+    "email": "john@example.com",
+    "phone": "(555) 555-5555"
+}
+```
+
+### dataclass
+
+`@dataclass`装饰器会自动为类生成多个魔术方法
+- `__init__`
+- `__repr__`
+- `__eq__`
+- `__hash__`
+  - 仅当`@dataclass(frozen=True)`时
+- sorted方法
+  - 仅当`@dataclass(order=True)`时
+  - 自动生成`__lt__`、`__le__`、`__gt__`、`__ge__`方法
+  - 若希望自定义排序规则，可以使用dataclasses.field控制或单独定义排序字段
+
+```python
+@dataclass(
+    init=True,
+    repr=True,
+    eq=True,
+    frozen=False,
+    order=False,
+    match_args=True, # 参数名称匹配
+    kw_only=False, # 关键字参数
+    slots=False,
+    weakref_slot=False
+)
+class Customer:
+    name: str
+    age: int
 ```
 
 ## 控制流
@@ -1040,131 +1283,104 @@ def func(param: List[T]) -> T:
 
 TypeVar可以添加限制。
 
-#### TypedDict
+#### 型变
+**不变**：无论A与B之间是否存在（超类或子类）关系，若泛型L是不变的，则L[A]就既不是L[B]的超类型，也不是L[B]的子类型，即L[A与L[B]不兼容。
 
-允许开发者定义字典的结构，推荐使用类定义语法。
-
-与NamedTuple相比，TypedDict键值可变，无需创建新的示例。
-
-与dataclass相比，TypedDict更适合处理JSON/字典数据，dataclass提供了更多面相对象的特性。
+不变类型可以保证类型安全，对于同时支持读写操作时，不变是最安全的选择。
 
 ```python
-from typing import TypedDict
+from typing import TypeVar, Generic
 
-class User(TypedDict):
-    name: str
-    age: int
-    email: str
+class Beverage:
+    """任何饮料类"""
+    pass
+
+class Juice(Beverage):
+    """果汁类"""
+    pass
+
+class OrangeJuice(Juice):
+    """橙汁类"""
+    pass
+
+# 默认泛型类型为不变
+T = TypeVar('T')
+
+class BeverageDispenser(Generic[T]):
+    def __init__(self, beverage: T) -> None:
+        self.beverage = beverage
+
+    def dispense(self) -> T:
+        return self.beverage
+
+def install(dispenser: BeverageDispenser[Juice]) -> None:
+    """安装饮料机"""
+
+# 有效
+juice_dispenser= BeverageDispenser(Juice())
+install(juice_dispenser)
+
+# 对超类和子类无效
+beverage_dispenser = BeverageDispenser(Beverage())
+install(beverage_dispenser) # incompatible type
+orange_juice_dispenser = BeverageDispenser(OrangeJuice())
+install(orange_juice_dispenser) # incompatible type
 ```
 
-**所有键默认设为可选**
+**协变**：兼容子类，但不兼容超类。
+
+适合只读操作。
 
 ```python
-class Employee(TypedDict, total=False):
-    # 只影响在类中定义的键，不影响继承键
-    name: str # 可选键
-    age: int # 可选键
-    email: str # 可选键
-    salary: float # 必选键
+# _co后缀是typeshed项目的协变类型参数命名约定
+T_co = TypeVar('T_co', covariant=True)
 
-# 创建只包含部分键的字典也合法
-my_employee: Employee = {
-    "name": "John"
-    "age": 25
-}
+class BeverageDispenser(Generic[T_co]):
+    def __init__(self, drink: T_co) -> None:
+        self.beverage = beverage
+
+    def dispense(self) -> T_co:
+        return self.beverage
+
+# install函数保持不变
+
+# 有效
+juice_dispenser= BeverageDispenser(Juice())
+install(juice_dispenser)
+orange_juice_dispenser = BeverageDispenser(OrangeJuice())
+install(orange_juice_dispenser)
+
+# 超类无效
+beverage_dispenser = BeverageDispenser(Beverage())
+install(beverage_dispenser) # incompatible type
 ```
 
-**限定特定键**
+**逆变**：兼容超类，但不兼容子类。
+
+适合只写操作场合。
 
 ```python
-from typing import TypedDict, NotRequired, Required
+# _contra后缀是typeshed项目的逆变类型参数命名约定
+T_contra = TypeVar('T_contra', covariant=True)
 
-class Project(TypedDict, total=False):
-    name: Required[str] # 显示标记为必需
-    description: str # 默认为可选 (total=False)
-    deadline: NotRequired[str] # 显示标记为可选
-```
+class BeverageDispenser(Generic[T_contra]):
+    def __init__(self, drink: T_contra) -> None:
+        self.beverage = beverage
 
-**继承TypedDict**
+    def dispense(self) -> T_contra:
+        return self.beverage
 
-```python
-from typing import TypedDict
+# install函数保持不变
 
-class PersonBase(TypedDict):
-    name: str
-    age: int
+# 有效
+juice_dispenser= BeverageDispenser(Juice())
+install(juice_dispenser)
+beverage_dispenser = BeverageDispenser(Beverage())
+install(beverage_dispenser)
 
-class Employee(PersonBase, total=False):
-    salary: float
-    department: str
-
-my_employee: Employee = {
-    "name": "John",
-    "age": 25,
-    "salary": 100000
-}
-```
-
-**组合TypedDict**
-
-```python
-from typing import TypedDict
-
-class Address(TypedDict):
-    street: str
-    city: str
-    state: str
-
-class Contact(TypedDict):
-    phone: str
-    email: str
-
-class Person(TypedDict):
-    name: str
-    address: Address # 组合TypedDict
-    contact: Contact # 组合TypedDict
-
-# 使用组合TypedDict
-person: Person = {
-    "name": "John",
-    "address": {
-        "street": "123 Main St",
-        "city": "Anytown",
-        "state": "CA"
-    },
-    "contact": {
-        "phone": "(555) 555-5555",
-        "email": "john@example.com"
-    }
-}
-```
-
-**类型合并**
-
-```python
-from typing import TypedDict
-
-class UserBase(TypedDict):
-    id: int
-    name: str
-
-class UserContact(TypedDict):
-    email: str
-    phone: str
-
-# 合并两个TypedDict
-class UserProfile(UserBase, UserContact):
-    age: int
-    address: str
-
-user: UserProfile = {
-    "id": 1,
-    "name": "John",
-    "age": 25,
-    "address": "123 Main St",
-    "email": "john@example.com",
-    "phone": "(555) 555-5555"
-}
+# 超类无效
+orange_juice_dispenser = BeverageDispenser(OrangeJuice())
+install(orange_juice_dispenser) # incompatible type
 ```
 
 ## 日志系统
@@ -1326,4 +1542,142 @@ def trace(self, message, *args, **kws):
     self.log(TRACE_LEVEL, message, *args, **kws)
 
 logging.Logger.trace = trace
+```
+
+## TOML配置文件
+
+TOML是常用的配置文件格式，文件拓展名为.toml。
+
+TOML的基本语法是键值对，支持嵌套。
+
+```toml
+title = "Python 配置文件"
+
+[author]
+name = "zzz"
+date = "2024-01-01"
+pi = 3.14
+is_enable = true
+
+[app]
+version = "1.0.0"
+
+[app.dependency]
+libs = ["tomllib", 'tomli']
+data = [['delta', 'phi'], [3.14]]
+temp_targets = { cpu = 79.5, case = 65.5 }
+```
+
+Python中`tomllib`为3.11+版本的内置库，仅支持读取TOML文件，不支持写入。
+
+`tomli-w`为写入库。
+
+```python
+# 读取TOML文件
+import tomllib
+
+def read_toml(path):
+    with open(path, 'rb') as f:
+        config = tomllib.load(f)
+    return config
+
+# 写入TOML文件
+import tomli_w
+
+def write_toml(path, config_dict):
+    with open(path, 'wb') as f:
+        tomli_w.dump(config_dict, f)
+
+# config_dict示例
+config = {
+    "app": {
+        "name": "demo",
+        "version": "1.0.0",
+        "debug": True
+    },
+    "logging": {
+        level: "DEBUG",
+        file_path: "app.log"
+    }
+}
+```
+
+## Pydantic数据验证
+
+Pydantic是基于Python类型注解的数据验证库。
+
+```python
+from pydantic import BaseModel
+from typing import Optional
+from datetime import datetime
+
+class sub(BaseModel):
+    app: str
+    version: str
+
+class User(BaseModel):
+    id: int
+    username: str
+    email: str
+    full_name: Optional[str] = None
+    create_at: datetime = datetime.now()
+    # 嵌套数据结构
+    sub: List[sub]
+
+# 创建实例
+user = User(
+    id=1,
+    username='zzz',
+    email='zzz@example.com',
+    sub=[
+        {'app': 'demo', 'version': '1.0.0'},
+        {'app': 'demo2', 'version': '2.0.0'}'
+    ])
+# 若示例不合法，程序会抛出ValidationError异常
+
+# 访问数据
+print(user.id)
+
+# 模型转换为字典
+user_dict = user.model_dump()
+# 模型转JSON
+user_json = user.model_dump_json(indent=4) # 带缩进
+# JSON转模型
+user_obj = User.model_validate_json(user_json)
+```
+
+Pydantic验证规则：`Field`类是Pydantic提供的字段定义工具，允许为字段添加字段的约束条件、默认值和描述信息。
+
+```Python
+from pydantic import Field, BaseModel, EmailStr, HttpUrl, constr, List, field_validator, model_validator
+
+class User(BaseModel):
+    name: str = Field(..., min_length=3, max_length=10) # 限制长度3-10
+    username: str = Field(..., pattern ='^[a-zA-Z0-9_-]{3,10}$')
+    age: int = Field(..., ge=0, le=120) # 限制范围0~120
+    email: EmailStr # 邮箱格式
+    url: HttpUrl # URL格式
+    description: str | None = Field(None, max_length=100) # 可选
+
+    items: List[str] = Field(..., min_items=1, max_items=5) # 限制列表长度
+    tags: List[str] = Field(..., unique_items=True) # 唯一性验证
+    prices: List[Float] = Field(..., gt=0) # 必须为正数
+
+    # 字段级验证
+    @field_validator('var_name')
+    def validate_var_name(cls, v):
+        # cls为类本身
+        if not v.startswith('ORD-'):
+            # return ValueError('Invalid order number')
+            # 将不合法的订单号转换为合法的订单号
+            return f'ORD-{v}'
+        return v
+
+    # 模型级验证：验证多个字段
+    @model_validator(mode='after')
+    # mode='after'：在实例化对象之后执行
+    def validate_total(self):
+        if self.price * self.quantity > 1000:
+            raise ValueError('Total price too high')
+        return self
 ```
