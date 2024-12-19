@@ -18,7 +18,8 @@ tags:
 ## 数据处理
 ### \*拆包与强制关键字参数
 #### 拆包
-```Python
+
+```python
 a, *b, c = [1, 2, 3, 4, 5]
 
 sum(*b)
@@ -49,7 +50,8 @@ result = {**dec1, **dec2}
 ```
 
 #### 强制关键字参数
-```Python
+
+```python
 def func(a, b, *, c):
     pass
 
@@ -445,7 +447,7 @@ df['salary'] = df.groupby('department')['salary'].rank(method='dense')
 
 数据描述器的优先级较高，会覆盖实例字典中的同名属性。
 
-```Python
+```python
 class DataDescriptor:
     def __get__(self, obj, objtype=None):
         # obj为使用描述器的对象
@@ -499,7 +501,7 @@ raise TypeError("Value must be an integer")
 高阶函数适合对大量数据进行过滤、映射和聚合，能够减少代码冗余。
 
 高阶函数可能带来额外的性能开销，应主要使用生成器表达式代替推导式节省内存；对于频繁调用的函数使用lru_cache缓存结果。
-```Python
+```python
 sorted(list, key=lambda x: x[1])
 
 map(lambda x, y: x * 2 + y * 2, list)
@@ -544,7 +546,7 @@ def process_data(data):
 
 它可以将接收一个或多个参数的函数改造成接收更少参数的回调的API。
 
-```Python
+```python
 from functools import partial
 
 def power(base: int, exponent: int) -> int:
@@ -701,6 +703,30 @@ print(isinstance(Car(), Vehicle)) # True
 
 abc模块是通过元类metaclass实现抽象基类的。
 
+### Protocol
+Python 3.8引入了Protocol，它与抽象基类基本一致，但无需显式地继承抽象基类。
+
+它更符合鸭子类型的概念，只要实现Protocol规定的方法，就可以实现类型检查。
+
+它适用于存在复杂继承关系的场景，避免了ABC需要显式继承导致的复杂性。
+
+```python
+from typing import Protocol, runtime_checkable
+
+@runtime_checkable # 启动运行时类型检查（只检查方法是否存在）
+class Drawable(Protocol):
+    def draw(self) -> None: ...
+
+class Circle: # 实现Drawable接口，无需显式继承
+    def draw(self) -> None:
+        print("Drawing a circle")
+
+def render(shape: Drawable) -> None:
+    shape.draw()
+
+render(Circle())
+```
+
 ### 元类metaclass
 
 元类就是类的类（工厂），它定义了创建类时的规则。
@@ -709,7 +735,7 @@ abc模块是通过元类metaclass实现抽象基类的。
 
 元类通常会重写`type`默认元类的`__new__`（类创建时调用）、`__init__`（类创建后初始化）、`__call__`（实例化时调用）三个魔术方法。
 
-```Python
+```python
 class MyMeta(type):
     def __new__(cls, name, bases, attrs):
         if 'required_method' not in attrs:
@@ -892,7 +918,7 @@ class Customer:
 ### 模式匹配match-case
 与if-else相比，模式匹配除了能匹配简单数据类型外，还可以根据复杂数据结构进行匹配。
 
-```Python
+```python
 def match_example(value):
     match value:
         case [x, y]:
@@ -908,7 +934,7 @@ def match_example(value):
 递归匹配特别适合处理树形或图状数据，如解析嵌套JSON数据。
 
 ex. 命令行参数解析
-```Python
+```python
 def process_command(command):
     match command.split():
         case ["quit" | "exit"]:
@@ -996,7 +1022,7 @@ iterable = chain(range(3), range(5, 8), other_iterable)
 
 `__init__.py`用于包级别初始化、控制导入等功能。
 
-```Python
+```python
 # package/__init__.py
 
 # 定义包相关变量
@@ -1175,7 +1201,7 @@ asyncio.run(coroutine_fun_2())
 
 `asyncio.Queue`具有流量控制机制和任务同步的功能。
 
-```Python
+```python
 async def producer_consumer_task():
     queue = asyncio.Queue(maxsize=5)
 
@@ -1204,7 +1230,8 @@ async def producer_consumer_task():
     consumer_task.cancel()
 ```
 
-#### 异步迭代器
+
+#### 异步迭代器 & 协程
 
 异步迭代器Async Iterator需要实现`__aiter__()`和`__anext__()`方法。
 
@@ -1244,12 +1271,220 @@ asyncio.run(main())
 
 异步可迭代对象可以迭代多次，每次获取新的迭代器。
 
+### 多线程threading
+
+> 3.13引入了free threaded build Cpython进入No GIL模式的开关，但距离实际实现No GIL并发挥多核优势还有距离。
+> 因此这里不考虑No GIL。
+
+由于`GIL`的存在，在CPU密集型任务中，多线程反而会降低性能，但在IO密集型任务中，多线程可以发挥一定的优势。
+
+多线程概念出现的主要目的是：“在不显式地切换任务的情况下，让CPU可以同时处理多个任务”。
+
+目前，异步编程，即协程比多线程更轻，且在单线程中完成没有竞争问题，在IO问题中被更多的应用。
+
+但是协程必须显式地放权给Event Loop，适用于多个能够频繁放权的任务，不能很好的处理同时具有一个CPU密集型任务和多个小任务的场景。
+
+这类任务多线程或协程`asyncio.run_in_executor`（本质上就是多线程/多进程）更适合。
+
+```python
+import threading
+import time
+
+# 检查当前激活的线程
+def check_thread():
+    # 获取当前线程
+    print(threading.active_count())
+    print(threading.enumerate())
+    # 当前运行的线程
+    print(threading.current_thread())
+
+def thread_job(sleep_time):
+    print("thread 1 job")
+    time.sleep(sleep_time)
+    print("thread 1 end")
+
+def thread_job_2(sleep_time):
+    print("thread 2 job")
+    for i in range(20):
+        time.sleep(sleep_time)
+    print("thread 2 end")
+
+def main():
+    check_thread()
+    # 创建线程
+    add_thread = threading.Thread(target=thread_job, args=(5,))
+    add_thread_2 = threading.Thread(target=thread_job_2, args=(2,))
+    # threading.Thread其他参数：kwargs关键字参数；name线程名，常用于日志；daemon守护线程，当主程序退出，守护线程也会强制退出。
+    # 启动线程
+    add_thread.start()
+    add_thread_2.start()
+    print("不等待add_thread结束")
+    # 等待线程结束再继续执行
+    add_thread.join()
+    print("等待add_thread_1结束")
+    add_thread_2.join()
+    print("All Done")
+
+if __name__ == "__main__":
+    main()
+```
+
+也可以继承`threading.Thread`类并重写`run()`方法来创建线程。
+
+`is_alive()`判断线程是否还在运行。
+
+#### Lock互斥锁
+
+当多个线程访问共享资源时，可能出现多个线程同时修改相同变量的竞争问题，导致结果可能偏离预期。
+
+使用Lock可以解决这个问题，保证当一个进程访问共享资源时，其他进程必须等待。
+
+```python
+import threading
+
+def job1():
+    global A, lock
+    with lock:
+        for i in range(10):
+            A += 1
+            print(f'job1: {A}')
+
+def job2():
+    global A, lock
+    lock.acquire()
+    for i in range(10):
+        A += 10
+        print(f'job2: {A}')
+    lock.release()
+
+if __name__ == '__main__':
+    lock = threading.Lock()
+    A = 0
+    t1 = threading.Thread(target=job1)
+    t2 = threading.Thread(target=job2)
+    t1.start()
+    t2.start()
+    t1.join()
+    t2.join()
+```
+
+#### 可重入锁RLock
+
+`RLock`允许同一个线程多次获取同一个锁，但其他线程必须等待当前线程完全释放锁后才能获取。
+
+主要应用于在递归函数中需要重复获取锁，或者同一个线程的不同方法中需要获取相同的锁的场景。
+
+```python
+import threading
+
+rlock = threading.RLock()
+
+def recursive_lock(count):
+    with rlock:
+        print(f'获取锁: {count}')
+        if count > 0:
+            recursive_lock(count - 1)
+        print(f'释放锁: {count}')
+
+if __name__ == '__main__':
+    thread = threading.Thread(target=recursive_lock, args=(5,))
+    thread.start()
+    thread.join()
+```
+
+#### Condition
+
+条件变量Condition是一种基于锁构建的线程同步机制，允许线程之间基于特定条件进行互动，主要应用于“生产者-消费者”模式。
+
+它适用于线程需要等待特定条件才能继续执行，或多个线程需要按特定顺序激活的情况，它无需被激活线程持续检查状态。
+
+- `Condition.wait()`会让线程释放锁并进入堵塞等待状态，直至被其他线程唤醒
+- `Condition.notify()`唤醒一个等待的线程
+- `Condition.notify_all()`唤醒所有等待的线程
+
+```python
+import threading
+condition = threading.Condition()
+
+def consumer():
+    with condition:
+        print("消费者等待被唤醒")
+        condition.wait()  # 等待通知
+        print("消费者被唤醒")
+
+def producer():
+    with condition:
+        print("生产者开始生产")
+        condition.notify()  # 发送通知
+        print("生产者发送通知")
+
+if __name__ == "__main__":
+    t1 = threading.Thread(target=consumer)
+    t2 = threading.Thread(target=producer)
+    t1.start()
+    t2.start()
+    t1.join()
+    t2.join()
+
+# 消费者等待被唤醒
+# 生产者开始生产
+# 生产者发送通知
+# 生产者被唤醒
+```
+
+### queue.Queue线程通讯
+与`asyncio.Queue`使用基本一致，但它是线程安全的，多个线程可以同时访问同一个队列。
+
+Queue默认使用FIFO先进先出策略。
+
+- `put(itme)`将item添加到队列尾部，若队列已满，则阻塞直至队列有空间
+- `get()`从队列头部获取一个item，若队列为空，则阻塞直至队列有数据
+- `empty()`判断队列是否为空
+- `full()`判断有界队列是否已满
+- `qsize()`返回队列中item的个数，对于无界队列可能返回`None`
+- `get_nowait()`get的非阻塞方法，若队列为空，则抛出`queue.Empty`异常
+- `put_nowait(item)`put的非阻塞方法，若队列已满，则抛出`queue.Full`异常
+
+#### 线程池
+
+线程的创建和销毁开销较大，因此可以利用线程池来复用线程。
+
+线程池预先创建一定数量的线程，当有任务需要处理时，线程池会自动从池中获取一个空闲线程执行任务，执行完毕后不销毁线程，返回线程池等待下一个任务。
+
+- `ThreadPoolExecutor(max_workers=n)`创建线程池
+  - `max_workers`指定线程池中最大线程数，数值过大会带来不必要开销，数值过小会降低整体性能
+- `submit(job, args...)`向线程池提交任务，会返回一个Future对象用于跟踪任务的执行状态和结果
+- `as_completed()`遍历已完成的任务，接收Future对象，返回一个迭代器
+
+```python
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+def func(arg):
+    return arg
+
+with TheadPoolExecutor(max_workers=3) as executor:
+    futures = []
+    for i in range(5):
+        future = executor.submit(func, i)
+        futures.append(future)
+    for future in as_completed(futures):
+        try:
+            result = future.result()
+            print(result)
+    except Exception as e:
+        print(e)
+```
+
+### 多进程multiprocessing
+
+```python
+```
 ## 类型提示
 
 > “小型程序，动态类型就够了，而大型程序则需要更规范的方式。” —— Fluent Python
 
 ### 容器类型
-```Python
+```python
 from typing import List, Dict, Set, Tuple
 
 def func(a: List[int], b: Dict[str, int], c: Set[str], d: Tuple[int, str]) -> None:
@@ -1381,6 +1616,38 @@ install(beverage_dispenser)
 # 超类无效
 orange_juice_dispenser = BeverageDispenser(OrangeJuice())
 install(orange_juice_dispenser) # incompatible type
+```
+
+### self类型提示
+
+方法链式调用是一种常见的编程模式，其核心在于方法需要返回对象本身，即self。
+
+Python 3.11+引入了`Self`类型提示。
+
+```python
+from typing import Self
+
+class MyClass:
+    def __init__(self) -> None:
+        self._data: dict = {}
+
+    def set_field(self, key: str, value: str) -> Self:
+        self._data[key] = value
+        return self
+
+    def validate(self) -> Self:
+        pass
+        return self
+
+    def save(self) -> None:
+        if self.validate():
+            print("saving:", self._data)
+
+# 链式调用方法
+user = (MyClass()
+    .set_field("name", "John")
+    .set_field("age", "30")
+    .save())
 ```
 
 ## 日志系统
@@ -1648,7 +1915,7 @@ user_obj = User.model_validate_json(user_json)
 
 Pydantic验证规则：`Field`类是Pydantic提供的字段定义工具，允许为字段添加字段的约束条件、默认值和描述信息。
 
-```Python
+```python
 from pydantic import Field, BaseModel, EmailStr, HttpUrl, constr, List, field_validator, model_validator
 
 class User(BaseModel):
