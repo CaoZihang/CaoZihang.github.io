@@ -13,7 +13,7 @@ tags:
 
 {:toc}
 
-> 整理自be better coder微信公众号、Fluent Python, Second Edition与码农高天。
+> 整理自be better coder微信公众号、Fluent Python, Second Edition、码农高天和Python官方文档。
 
 ## 数据处理
 ### \*拆包与强制关键字参数
@@ -243,62 +243,6 @@ if Permission.READ in user_permission: ...
 
 枚举常用于配置管理、状态机、数据库模型。
 
-### with上下文管理
-
-上下文管理器基于`__enter__()`和`__exit__(exc_type, exc_value, traceback)`两个特殊方法。
-
-当执行`with`语句时，Python解释器会调用上下文管理器的`__enter__()`方法，将`__enter__()`方法的返回值赋值给`as`子句的变量，之后执行`with`语句体中的代码，最后调用上下文管理器的`__exit__()`方法。
-
-上下文管理器常用于文件操作，数据库，网络，线程锁，临时目录操作，计时器，环境变量修改等。
-
-#### 自定义上下文管理器
-
-```python
-# 基于类的实现
-class MyContextManager:
-    def __init__(self, name):
-        self.name = name
-
-    def __enter__(self):
-        print(f"Entering context: {self.name}")
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        print(f"Exiting context: {self.name}")
-        if exc_type:
-            print(f"Exception: {exc_type}, {exc_value}")
-        return False
-
-# 基于装饰器的实现
-from contextlib import contextmanager
-
-@contextmanager
-def my_context_manager(name):
-    print(f"Entering context: {name}")
-    try:
-        yield
-    finally:
-        print(f"Exiting context: {name}")
-```
-
-`contextlib`模块提供了多个上下文管理相关的工具：
-- `@contextmanager`装饰器，用于创建上下文管理器
-- `closing()`自动调用对象的close()方法
-- `suppress()`忽略特定异常
-- `ExitStack`动态管理一组上下文管理器
-
-```python
-from contextlib import contextmanager
-
-def process_files(file_list):
-    with ExitStack() as stack:
-        files = [stack.enter_context(open(file_name)) for file_name in file_list]
-        # 所有的文件都打开
-        for file in files:
-            print(file.read())
-        # 退出with语句后，所有文件会自动关闭
-```
-
 ### 高效Pandas
 #### 数据读取
 ```python
@@ -405,6 +349,293 @@ df['salary'] = df.groupby('city').transform(lambda x: x.mean())
 df['salary'] = df.groupby('department')['salary'].rank(method='dense')
 ```
 
+### NumPy
+#### 读取数据
+
+- `np.genfromtxt('file.csv', dtype='float' ,delimiter=',', skip_header=1, usecols=(1, 2, 3), encoding='utf-8', missing_values=['NA', ''], filling_values=0)
+  - 用于读取csv
+- `np.loadtxt('data.txt')读取文本文件，默认按空格分隔
+
+### 二进制序列
+
+二进制序列直接处理字节级别数据，因此在处理底层数据时更高效。
+
+操作二进制数据的核心内置类型是`bytes`和`bytearray`，它们由`memoryview`提供支持。
+
+#### bytes
+
+`bytes`对象是由单个字节构成的不可变序列。
+
+它提供了一些仅在处理ASCII兼容数据时可用的方法。
+
+`bytes`字面值中只允许ASCII字符（无论源码声明的编码格式如何）。
+
+`bytes`对象的行为更像不可变的整数序列，序列中每个值的大小满足`0 <= x < 256`，否则会引发`ValueError`。
+
+```python
+simple_bytes = b'hello world'
+
+string2bytes = 'Hello World'.encode('utf-8')
+
+list2bytes = bytes([65, 66, 67])
+
+# 索引
+print(simple_bytes[0]) # 104 h的ASCII码
+print(simple_bytes[1:4]) # b'ell'
+
+# 打印每个字符的十六进制表示，使用-分隔
+print(simple_bytes.hex('-'))
+
+# 十六进制转bytes
+print(bytes.fromhex(simple_bytes.hex()))
+```
+
+#### bytearray
+`bytearray`对象是可变版本的`bytes`对象，适用于需要频繁修改的场景。
+
+`bytearray`没有字面值语法，总是通过调用构造器创建。
+
+```python
+empty_bytearray = bytearray() # 创建空bytearray
+zero_bytearray = bytearray(10) # 创建长度为10由零字节填充的bytearray
+range_bytearray = bytearray(range(10)) # 创建长度为10由0到9的bytearray
+
+# 通过缓冲区协议复制现有的二进制数据
+buffer = bytearray(b'hello world')
+buffer[0] = 72 # 修改第一个字节
+print(buffer) # b'Hello world'
+
+buffer.extend(b'!') # 追加数据
+```
+
+`bytes`与`bytearray`对象都支持通用序列操作，它们步进可以与同类型对象进行操作，也可以与任何`bytes-like-object`进行操作，操作结果的返回值类型可能取决于第一个操作数的类型。
+
+支持的方法包括`count`, `removeprefix`, `decode`, `endwith`, `find`, `index`, `join`, `replace`等。
+
+`bytes`和`bytearray`对象的方法不支持字符串作为其参数。
+
+```python
+a = b"abc"
+f = a.replace(b"a", b"f")
+```
+
+#### memoryview
+`memoryview`对象使用缓冲区协议访问其他二进制对象所在内存，不需要创建对象的副本。
+
+**缓冲区协议Buffer Protocol**
+
+缓冲器协议是Python的一个底层接口，它允许不同的对象共享内存或数据，而无需复制。
+
+支持缓冲区协议的对象可以直接暴露其内部数据缓冲区，供其他对象访问。
+
+支持缓冲区协议的对象类型：
+
+- `bytes`和`bytearray`对象
+- `array.array`
+- `memoryview`对象
+- `NumPy`数组对象
+- `PIL`图像
+
+缓冲区协议可以避免不必要的数据复制、减少内存占用、提高数据处理速度；允许多个对象访问相同的内存区域，适用于大数据处理和科学计算；支持不同数据类型之间的转换。
+
+```python
+import array
+
+numbers = array.array('i', [1, 2, 3])
+
+# 创建内存视图
+memory_view = memoryview(numbers)
+
+# 不复制数据的情况下修改原始数组
+view[0] = 10
+
+# 查看内存视图的属性
+print(view.format)
+print(view.itemsize)
+print(view.nbytes)
+print(view.readonly)
+
+# 手动释放资源
+view.release()
+```
+
+### mmap内存映射文件支持
+
+mmap提供了将文件内容映射到内存地址空间的方法，从而让程序像访问内存一样访问文件内容，从而提高文件读写效率。
+
+mmap主要应用于处理大型文件，如数据库、日志文件。
+
+mmap减少了传统文件I/O操作需要的系统调用次数，支持多进程共享内存。
+
+对于大型文件，mmap可以避免将整个文件读入内存，从而节省内存资源。
+
+> Windows下文件大小必须大于0
+> Windows和Unix系统实现mmap的方式存在差异
+
+```python
+import mmap
+
+with open('file.txt', 'wb') as f:
+    f.write(b'Hello World')
+
+with open('file.txt', 'r+b') as f:
+    # 对文件进行内存映射，大小0表示整个文件
+    mm = mmap.mmap(f.fileno(), 0)
+    # 注意文件指针位置
+    print(mm.readline())
+    print(mm[:5])
+    # 返回内容为bytes，若需要字符串则应追加decode方法
+    # 修改的内容长度必须严格一致 (与.write方法一致)
+    mm[6:] = b"world! \n"
+    # 移动到指定位置
+    mm.seek(0)
+    print(mm.readline())
+    # 关闭映射
+    mm.close()
+```
+
+mmap读取方法：`read(byte_size)`、`readline`
+
+mmap位置控制：`tell`当前位置、`seek(position)`移动到指定位置、`size`映射大小
+
+使用正则搜索：
+
+```python
+import re
+import mmap
+
+with open('file.txt', 'r+b') as f:
+    mm = mmap.mmap(f.fileno(), 0)
+
+    pattern = re.compile(b'[a-z]+')
+    match = pattern.search(mm)
+
+    if match:
+        print(f'Match found: {match.start()}'')
+```
+
+### NamedTuple
+
+`NamedTuple`是`tuple`的子类，它为元组提供了更human-readable的表示形式，但又比字典要轻量级。
+
+```python
+from collections import namedtuple
+
+# 创建一个名为Point的NamedTuple，包含x和y两个字段
+Point = namedtuple('Point', ['x', 'y'])
+
+p = Point(1, 2)
+
+print(p.x, p.y)
+print(p[0], p[1])
+x, y = p
+
+# 获取字段名
+print(p._fields)
+# 转换为字典(变为可变类型)
+p._asdict()
+
+# 基于示例创建
+t = [11, 22]
+p2 = Point._make(t)
+
+# 替换指定值
+p2 = p2._replace(x=100)
+
+# 默认值
+Person = namedtuple('Person', ['name', 'age'],
+                   defaults=(None, 30))
+p3 = Person('Bob')
+
+# 字段重命名：当字段无效（冲突或重复）时，会自动转换成位置名
+Student = namedtuple('Student', ['name', 'age', 'class', 'gender', 'age'], rename=True)
+s = Student('Bob', 20, 'Class1', 'Male', 20)
+# Student(name='Bob', age=20, _3='Class1', gender='Male', _5=20))
+
+# 类型提示
+def process(student: List[Student]) -> Dict[str, int]]:
+    pass
+
+# 动态生成字段名
+fields = ['field_' + str(i) for i in range(10)]
+MyTuple = namedtuple('MyTuple', fields)
+```
+
+`NamedTuple`经常用于赋值`csv`, `sqlite3`模块返回的不可变数据。
+
+```python
+EmployeeRecord = namedtuple('EmployeeRecord', ['name', 'age', 'gender', 'job', 'salary'])
+
+import csv
+for emp in map(EmployeeRecord._make, csv.reader(open('employees.csv', 'rb'))):
+    print(emp.name, emp.salary)
+
+import sqlite3
+conn = sqlite3.connect('employees.db')
+cursor = conn.cursor()
+cursor.execute('SELECT name, salary FROM employees')
+for emp in map(EmployeeRecord._make, cursor.fetchall()):
+    print(emp.name, emp.salary)
+```
+
+### deque双端队列
+与列表相比，`deque`在两端的操作速度更快，内存使用效率更高，适用于需要频繁在队列两端插入或删除元素的场景。
+
+`deque`两端操作的时间复杂度为O(1)，列表的时间复杂度为O(n)。
+
+`deque`支持索引访问，但性能不如列表；不支持切片操作；maxlen不可更改。
+
+`deque`是线程安全的。
+
+常用于限制长度的场景（如最近n条历史记录）、循环缓冲区（如计算移动平均、缓存）、双向遍历。
+
+```python
+from collections import deque
+
+d1 = deque() # 不限长度的空deque
+d2 = deque([1, 2, 3]) # 基于列表创建
+d3 = deque(maxlen=3) # 限制长度
+
+d1.append(1) # 右端添加
+d1.appendleft(0) # 左端添加
+d1.extend([4, 5, 6]) # 右侧添加多个元素
+d1.extendleft([0, 1, 2])
+d1.insert(1, 2) # 将元素插入到指定位置
+d1.index(1) # 查找元素索引
+d1.pop() # 右端删除并返回
+d1.popleft()
+d1.remove(1) # 移除第一个1
+d1.reverse() # 逆序排列
+d1.rotate(1) # 向右循环n步，若n为负数，则向左循环
+# 等价于d.appendleft(d.pop())执行n次
+d1.clear() # 移除所有元素
+d1.copy() # 浅拷贝
+d1.count(1) # 计算deque中元素为1的个数
+d1.maxlen() # 返回最大长度
+```
+
+### 引用
+
+当不再需要某个大型对象时，应该显示地将其设为`None`来帮助垃圾回收器更快地回收内存。
+
+### 序列化
+序列化后的数据可以采用多种格式：
+
+- 二进制文件（`pickle`）
+- 文本文件（`json`、`yaml`、`xml`）
+- 自定义格式
+
+#### pickle
+`pickle`几乎可以序列化所有的Python对象，包括函数和类。
+
+但是`pickle`可以执行反序列化的代码，因此**安全性较低**，应只反序列化来自可信源的数据，并实现数据完整性校验机制。
+
+`pickle`数据格式是Python专属的，不支持跨平台。
+
+#### JSON
+只能序列化有限的数据类型。
+
+## 函数
 ### 魔术方法
 
 - `__new__`建立对象时触发，需要返回obj，使用不多
@@ -487,14 +718,6 @@ raise TypeError("Value must be an integer")
 
 - `__missing__`仅适用于继承dict的衍生类，当键不存在时的操作
 
-### NumPy
-#### 读取数据
-
-- `np.genfromtxt('file.csv', dtype='float' ,delimiter=',', skip_header=1, usecols=(1, 2, 3), encoding='utf-8', missing_values=['NA', ''], filling_values=0)
-  - 用于读取csv
-- `np.loadtxt('data.txt')读取文本文件，默认按空格分隔
-
-## 函数
 ### 高阶函数
 接受函数作为参数，或把函数作为结果返回的函数即为高阶函数。
 
@@ -511,16 +734,21 @@ filter(lambda x: x % 2 == 0, list)
 
 #### reduce规约
 
+`reduce`会取序列的前两个元素传入指定函数运算，再将运算结果与序列的下一个元素继续运算，直到序列结束。
+
+`reduce`要求必须传入一个接收2个参数的二元函数。
+
 ```python
 from functools import reduce
 
-reduce(lambda x, y: x + y, list, start_value)
+reduce(lambda x, y: x + y, [list], [start_value])
 
 query_params = {"name": "Cao", "age": 24}
 query_params_str = reduce(
     lambda x, y: f"{x} -> {y}",
     map(lambda x: f"{x[0]}={x[1]}", query_params.items())
 )
+# name=Cao -> age=24
 
 # 使用reduce链式处理数据
 def process_pipeline(data):
@@ -529,6 +757,7 @@ def process_pipeline(data):
         lambda x: x.lower(),
         lambda x: x.replace(" ", "-")
     ]
+    # 此处data作为初始值绑定x
     return reduce(lambda x, y: y(x), transformations, data)
 
 def process_data(data):
@@ -662,6 +891,64 @@ counter = create_counter()
 print(counter["increment"]())
 print(counter["get_count"]())
 ```
+
+### Lambda
+
+Lambda函数可以指定默认参数，使用多重条件表达式。
+
+```python
+func = lambda x, y="default": f"{x} -> {y}"
+
+grade = lambda score: "A" if score >= 90 else ("B" if score >= 80 else ("C" if score >= 70 else "D"))
+```
+
+#### 柯里化冻结参数
+
+```python
+# 结合闭包
+def multiplier(n):
+    return lambda x: n * x # Lambda函数可以绑定外部函数的局部变量
+
+double = multiplier(2) # Lambda函数n=2
+triple = multiplier(3)
+
+print(double(3))
+print(triple(3))
+
+# 完全使用Lambda函数实现柯里化
+def curry(f): return lambda x: lambda y: f(x, y)
+
+add = curry(lambda x, y: x + y) # 固定f
+add_five = add(5) # 固定x
+print(add_five(5)) # 赋值y
+
+# 实际应用例子
+def create_formatter(prefix):
+    return lambda x: f"{prefix}-{x}"
+
+log_error = create_formatter("ERROR")
+print(log_error("This is an error"))
+
+log_info = create_formatter("INFO")
+print(log_info("This is an info"))
+```
+
+#### 函数组合
+
+```python
+def compose(*funcs):
+    return reduce(lambda f, g: lambda x: f(g(x)), functions)
+
+add_one = lambda x: x + 1
+multiply_two = lambda x: x * 2
+
+pipeline = compose(multiply_two, add_one) # 绑定f,g
+print(pipeline(5))
+```
+
+Lambda函数适用场景：
+- 函数逻辑简单，仅使用一次，不再复用
+- 需要将函数作为参数传递给高阶函数时
 
 ## 类
 ### 抽象基类ABC
@@ -915,6 +1202,62 @@ class Customer:
 ```
 
 ## 控制流
+### with上下文管理
+
+上下文管理器基于`__enter__()`和`__exit__(exc_type, exc_value, traceback)`两个特殊方法。
+
+当执行`with`语句时，Python解释器会调用上下文管理器的`__enter__()`方法，将`__enter__()`方法的返回值赋值给`as`子句的变量，之后执行`with`语句体中的代码，最后调用上下文管理器的`__exit__()`方法。
+
+上下文管理器常用于文件操作，数据库，网络，线程锁，临时目录操作，计时器，环境变量修改等。
+
+#### 自定义上下文管理器
+
+```python
+# 基于类的实现
+class MyContextManager:
+    def __init__(self, name):
+        self.name = name
+
+    def __enter__(self):
+        print(f"Entering context: {self.name}")
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        print(f"Exiting context: {self.name}")
+        if exc_type:
+            print(f"Exception: {exc_type}, {exc_value}")
+        return False
+
+# 基于装饰器的实现
+from contextlib import contextmanager
+
+@contextmanager
+def my_context_manager(name):
+    print(f"Entering context: {name}")
+    try:
+        yield
+    finally:
+        print(f"Exiting context: {name}")
+```
+
+`contextlib`模块提供了多个上下文管理相关的工具：
+- `@contextmanager`装饰器，用于创建上下文管理器
+- `closing()`自动调用对象的close()方法
+- `suppress()`忽略特定异常
+- `ExitStack`动态管理一组上下文管理器
+
+```python
+from contextlib import contextmanager
+
+def process_files(file_list):
+    with ExitStack() as stack:
+        files = [stack.enter_context(open(file_name)) for file_name in file_list]
+        # 所有的文件都打开
+        for file in files:
+            print(file.read())
+        # 退出with语句后，所有文件会自动关闭
+```
+
 ### 模式匹配match-case
 与if-else相比，模式匹配除了能匹配简单数据类型外，还可以根据复杂数据结构进行匹配。
 
@@ -951,7 +1294,7 @@ def process_command(command):
 
 模式匹配的内存使用略高于简单条件句，因此对于复杂的模式推荐使用if-else。
 
-### 迭代
+### 迭代对象与迭代器
 可迭代对象Iterable是指实现了__iter__()方法的对象。
 
 迭代器Iterator是指实现了__iter__()和__next__()方法的对象。
@@ -1432,7 +1775,7 @@ if __name__ == "__main__":
 # 生产者被唤醒
 ```
 
-### queue.Queue线程通讯
+#### queue.Queue线程通讯
 与`asyncio.Queue`使用基本一致，但它是线程安全的，多个线程可以同时访问同一个队列。
 
 Queue默认使用FIFO先进先出策略。
@@ -1477,8 +1820,118 @@ with TheadPoolExecutor(max_workers=3) as executor:
 
 ### 多进程multiprocessing
 
+`multiprocessing`模块与`threading`模块API高度相似。
+
+`multiprocessing`使用子进程而非线程，从而有效地绕过了CIL。
+
+`multiprocessing`需要在`if __name__ == '__main__':`中运行，从而保护程序入口点，确保新的解释器可以安全地导入主模块，而不产生意外的副作用（如启动新进程）。
+
+`multiprocessing`支持三种启动进程的方法：
+
+- `spawn`父进程会启动新的python解释器，子进程只继承运行程序对象的`run()`方法所必须的资源
+  - 启动进程速度比`fork`和`forkserver`要慢
+  - 适配Windows和POSIX系统，是Windows和macOS的默认启动方法
+- `fork`父进程通过`os.fork()`产生Python解释器分叉，父进程的所有资源由子进程继承
+  - 安全地分叉多进程这一线程是困难的
+  - 仅适配POSIX系统 （Python 3.14+不再将`fork`作为默认启动方法）
+- `forkserver`产生一个服务器进程，当需要新的进程时，父进程会连接服务器并请求分叉一个新进程
+  - 分叉服务器是单线程的，因此使用`os.fork()`通常是安全的
+  - 仅继承必要的资源
+  - 仅适配支持通过Unix管道传递文件描述符的POSIX系统，如Linux
+
 ```python
+import multiprocessing as mp
+
+def func(a, b):
+    print(a, b)
+
+if __name__ == '__main__':
+    # 若args只有一个值，应写为(1,)
+    p1 = mp.Process(target=func, args=(1, 2))
+    p2 = mp.Process(target=func, args=(3, 4))
+    p1.start()
+    p2.start()
+    p1.join()
+    p2.join()
 ```
+
+`multiprocessing.queue`和`multiprocessing.Lock`与前面的`threading`提供的方式基本一致。
+
+#### 共享内存
+在进行并发编程时，最好尽量避免使用共享状态，但若必须使用，可以选择`multiprocessing.Value`或`multiprocessing.Array`将数据存储在共享内存映射中，或使用`multiprocessing.sharedctypes`分配任意ctype对象。
+
+```python
+from multiprocessing import Value, Array, Process
+
+# 实践中需要考虑是否必须使用Lock
+def f(n, a):
+    n.value = 3.14
+    for i in range(len(a)):
+        a[i] = -a[i]
+
+if __name__ == '__main__':
+    num = Value('d', 0.0)
+    arr = Array('i', range(10))
+    p = Process(target=f, args=(num, arr))
+    p.start()
+    p.join()
+    print(num.value) # 3.14
+    print(arr[:]) # [0, -1, -2, -3, -4, -5, -6, -7, -8, -9]
+```
+
+#### Pipe管道
+
+`multiprocessing.Pipe()`函数返回一对由管道连接的连接对象，默认情况下它是双工的。
+
+这一对连接对象视作管道的两端，若两个进程（线程）同时尝试访问或写入管道的同一端可能损坏管道中的数据，可以同时使用管道不同端。
+
+每个连接对象都有`send()`和`recv()`方法，用于发送和接收数据。
+
+```python
+from multiprocessing import Process, Pipe
+
+def f(conn):
+    conn.send([42, None, 'hello'])
+    conn.close()
+
+if __name__ == '__main__':
+    parent_conn, child_conn = Pipe()
+    p = Process(target=f, args=(child_conn,))
+    p.start()
+    print(parent_conn.recv()) # [42, None, 'hello']
+    p.join()
+```
+
+#### 进程池
+
+多进程进程池采用`multiprocessing.Pool`。
+
+```python
+import multiprocessing as mp
+
+def func(a):
+    return a
+
+if __name__ == '__main__':
+    # 不指定processes参数，则使用os.cpu_count()
+    with mp.Pool(processes=4) as pool:
+        # map会在多进程中并行执行
+        # map只支持一个可迭代参数，对于多个可迭代参数，使用starmap()
+        result = pool.map(func, range(100))
+        print(result) # [0, 1, 2, ..., 99]
+
+        # map会将可迭代对象分割成多个块提交给进程池
+        # 对于很长的可迭代对象，map可能消耗较多内存，可以使用imap或imap_unordered优化并显示指定chunksize提升效率
+        # imap返回有序结果，imap_unordered返回无序结果
+        for i in pool.imap_unordered(func, range(100), chunksize=10):
+            print(i)
+
+        # 异步地在单一进程中执行单一任务
+        res = pool.apply_async(func, (1,))
+        print(res.get(timeout=1))
+        # 多次调用可能会使用多进程
+```
+
 ## 类型提示
 
 > “小型程序，动态类型就够了，而大型程序则需要更规范的方式。” —— Fluent Python
