@@ -632,8 +632,419 @@ d1.maxlen() # 返回最大长度
 
 `pickle`数据格式是Python专属的，不支持跨平台。
 
+**序列化**
+
+- `pickle.dump(obj, file)`将obj封存后的对象作为二进制数据写入file中
+  - file参数必须有一个`write`方法
+- `pickle.dumps(obj)`将obj封存后的对象作为二进制数据直接返回
+
+可以指定序列化的pickle协议。
+
+```python
+import pickle
+
+user_data = {
+    'username': 'Bob',
+    'age': 20,
+    'gender': 'Male'
+}
+
+# 二进制
+serialized = pickle.dumps(user_data)
+# 写入文件
+# 文件格式.pkl和.pickle一致
+try:
+    with open('user_data.pkl', 'wb') as f:
+        pickle.dump(user_data, f)
+    return True
+except (IOError, pickle.PickleError) as e:
+    print(f'Error: {e}')
+    return False
+```
+
+**反序列化**
+
+- `pickle.load(file)`从file中读取封存对象，重建其层次结构并返回
+  - file参数必须有一个`read`方法接受一个整数参数，`readinto`方法接受一个缓冲区参数，以及一个`readline`方法
+  - pickle协议版本会自动检测
+- `pickle.loads(data)`从二进制对象（bytes-like object）中读取封存对象，重建其层次结构并返回
+
+> ！警告：反序列化只适合可信来源的数据，可能会运行恶意代码。
+
+```python
+import pickle
+
+# 将序列化的对象反序列化
+raw_data = {'name': 'Bob', 'age': 20}
+serialized = pickle.dumps(raw_data)
+data = pickle.loads(serialized)
+
+# 从文件中读取并反序列化
+try:
+    with open('user_data.pkl', 'rb') as f:
+        data = pickle.load(f)
+    print(f'Loaded data: {data}')
+except FileNotFoundError:
+    print('File not found.')
+except pickle.UnpicklingError:
+    print('Invalid data.')
+```
+
+**压缩**
+
+```python
+import gzip
+
+with gzip.open('data.pkl.gz', 'wb') as f:
+    pickle.dump(raw_data, f)
+
+with gzip.open('data.pkl.gz', 'rb') as f:
+    data = pickle.load(f)
+```
+
+**安全机制**
+
+> 对于反序列化，可以考虑使用白名单或数据签名验证的方法提升安全性。
+> 但对于不可信数据，仍然**建议使用其他方法**，如JSON。
+
+- 白名单
+
+默认情况下，反序列化会导入在pickle数据中找到的任何类或函数，对于多数应用而言这一做法是不安全的。
+
+可以通过重写`Unpickler.find_class()`方法来控制反序列化的对象。
+
+`Unpickler.find_class()会在执行任何全局对象的请求时触发。
+
+```python
+# 仅允许builtins模块的部分类加载
+import pickle
+import builtins
+import io
+
+safe_builtins = {
+    'range',
+    'complex',
+    'set'
+}
+
+# 重写Unpickler的find_class()方法
+class RestrictedUnpickler(pickle.Unpickler):
+    def find_class(self, module, name):
+        if module == 'builtins' and name in safe_builtins:
+            return getattr(builtins, name)
+        raise pickle.UnpicklingError(f'Attempting to unpickle unsafe module/name {module}-{name}')
+
+def restricted_loads(pickled_data):
+    """类似pickle.loads()的辅助函数"""
+    return RestrictedUnpickler(io.BytesIO(pickled_data)).load()
+
+restricted_loads(serialized)
+
+with open('user_data.pkl', 'rb') as f:
+    return RestrictedUnpickler(f).load()
+```
+
+- 数字签名
+
+```Python
+import pickle
+import hmac
+import hashlib
+
+# 创建带有签名的pickle数据
+def save_with_signature(data, file, key):
+    serialized = pickle.dumps(data)
+    # 使用sha256算法生成签名
+    signature = hmac.new(
+        # 将字符串转化为二进制
+        key.encode(),
+        serialized,
+        hashlib.sha256
+    ).hexdigest()
+    # 以十六进制形式计算认证码
+
+    with open(file, 'wb') as f:
+        pickle.dump((signature, serialized), f)
+
+# 读取带有签名的pickle数据
+def load_with_signature(file, key):
+    with open(file, 'rb') as f:
+        signature, serialized = pickle.load(f)
+
+    # 重新计算签名
+    received_signature = hmac.new(
+        secret_key.encode(),
+        serialized,
+        hashlib.sha256
+    ).hexdigest()
+
+    if not hmac.compare_digest(signature, received_signature):
+        raise ValueError('Invalid data.')
+
+    return pickle.loads(serialized)
+```
+
 #### JSON
 只能序列化有限的数据类型。
+
+> JSON解析恶意数据时可能导致解码器消耗大量CPU和内存，应该对要解析的数据大小进行限制。
+
+`JSON`模块提供了与`pickle`相似的API接口。
+
+```python
+import json
+
+with open('data.json', 'w', encoding='utf-8') as f:
+    json.dump(data, f, ensure_ascii=False, indent=4)
+
+with open('data.json', 'r', encoding='utf-8') as f:
+    data = json.load(f)
+```
+
+### ChainMap
+
+`collections.ChainMap`将多个字典或其他映射组合在一起，创建一个单独的可更新的视图。
+
+`ChainMap`的组合是逻辑上的，它只储存映射的引用，原始字典（或映射）仍保持独立，且不会复制数据占据内存。
+
+`ChainMap`的查找操作按照在构造函数调用出现的顺序执行，当找到第一个匹配的键后停止，保证更高优先级的配置覆盖了低优先级的配置。
+
+向`ChainMap`中添加新的键值对时，新的键值对会被添加到最前面的字典中。
+
+```python
+from collections import ChainMap
+
+dict1 = {'a': 1, 'b': 2}
+dict2 = {'b': 3, 'c': 4}
+
+chain_map = ChainMap(dict1, dict2)
+
+print(chain_map['a']) # 1
+print(chain_map['b']) # 2 (源自dict1)
+print(chain_map['c']) # 4
+
+chain_map['d'] = 5
+print(dic1) # {'a': 1, 'b': 2, 'd': 5} 会更新在第一个映射中
+
+print(chain_map.maps) # 查看映射列表
+```
+
+`ChainMap`也提供了`new_child`和`parents`方法用于嵌套。
+
+`ChainMap`适合快速配置切换的场景，能够适应需要动态调整的配置。
+
+### 弱引用
+
+Python使用引用计数机制管理内存，当对象的引用计数为0时就会被释放。
+
+在一些应用中，部分特定对象相关的内容（如记录）是否具有意义依赖于是否存在对该对象的其他引用，若不存在其他引用，则应释放这些内容。
+
+弱引用提供了在不增加对象引用计数的情况下引用对象的方法，使其可以在正确的时机释放。
+
+> 弱引用只是不作为对象存活的保证，令python可以销毁所指对象，但在实际销毁对象之前，即使没有强引用，弱引用仍能返回该对象。
+
+主要用于存储大型对象的缓存或映射且不希望保证其存活。
+
+```python
+import weakref
+import sys
+
+class Obj:
+    def __init__(self, name):
+        self.name = name
+
+obj1 = Obj('obj1')
+# 强引用
+obj2 = obj1
+# getrefcount返回引用计数 (其本身也会创建一个引用)
+print(f"引用计数为{sys.getrefcount(obj1) - 1}")
+# 引用计数为2
+
+weak_ref = weakref.ref(obj1)
+# 可以像对象本身一样使用
+print(weak_ref().name)
+print(f"引用计数为{sys.getrefcount(obj1) - 1}")
+# 引用计数仍为2
+
+del obj2
+del obj1
+print(weak_ref()) # None
+```
+
+CPython中`tuple`和`int`等内置类型不支持类引用，当类被定义了`__slots__`时弱引用会被默认禁用，除非将`__weakref__`字符串加入到`__slots__`声明的字符串序列中。
+
+#### 弱引用释放处理
+
+弱引用提供了两种机制处理对象被释放的情况：`callback` 和 `finalize`。
+
+**callback**
+
+回调函数会在对象被释放后调用。
+
+```python
+import weakref
+
+class Resource:
+    def __init__(self, name):
+        self.name = name
+
+def resource_callback(weak_ref):
+    print(f"realse {weak_ref}")
+
+r = Resource("test")
+ref = weakref.ref(r, resource_callback)
+
+del r
+# realse <weakref at 0x000001600DB28270; dead>
+```
+
+**finalize**
+`weakref.finalize(obj, func, /, *args, **kwargs)`
+
+`finalize`与`callback`相比可以传递额外的参数；手动调用或取消处理函数；查询当前finalize状态；保证只被调用一次。
+
+```python
+import weakref
+
+class Resource:
+    def __init__(self, name):
+        self.name = name
+
+def resource_finalizer(obj, log=None):
+    message = f"{obj.name} is released"
+    if log:
+        print(f"{log}: {message}")
+    print(message)
+
+r = Resource("test")
+finalizer1 = weakref.finalize(
+    r,
+    resource_finalizer,
+    r,
+    log="mylog"
+)
+
+# 检查finalize状态
+print(finalizer1.alive)
+# 调用
+# del r
+
+# 手动取消finializer
+finalizer1.detach()
+# 不再执行
+print(finalizer1.alive)
+
+finalizer2 = weakref.finalize(r, resource_finalizer, r)
+# 手动触发finalizer
+finalizer2()
+# 只能触发一次
+finalizer2()
+```
+
+#### 弱引用代理
+让弱引用像原始对象一样直接访问对象的属性和方法，且当原始对象被回收时，代理会自动抛出`ReferenceError`。
+
+
+```python
+# 创建普通弱引用
+normal_ref = weakref.ref(obj)
+print(normal_ref().name)
+# 创建弱引用代理
+proxy_ref = weakref.proxy(obj)
+print(proxy_ref.name)
+
+del obj
+
+try:
+    print(proxy_ref.name)
+except ReferenceError:
+    print("ReferenceError")
+```
+
+#### 实例方法弱引用
+
+类中方法的弱引用需要特殊处理，使用`WeakMethod`。
+
+普通函数或静态方法不能使用`WeakMethod`。
+
+```python
+import weakref
+
+class Controller:
+    def __init__(self):
+        # 存储回调方法列表（使用弱引用）
+        self._callbacks = []
+
+    def add_callback(self, callback_method):
+        """
+        使用弱引用添加回调方法列表
+        """
+        weak_method = weakref.WeakMethod(callback_method)
+        self._callbacks.append(weak_method)
+
+    def execute_callbacks(self):
+        """
+        执行所有的回调方法
+        若回调方法被释放，则从列表中移除
+        """
+        # 由于会在迭代中修改列表，因此使用列表副本
+        for weak_method in self._callbacks[:]:
+            callback_method = weak_method()
+            if callback_method:
+                callback_method()
+            else:
+                self._callbacks.remove(weak_method)
+
+class Subscriber:
+    def __init__(self, name):
+        self.name = name
+
+    def on_event(self):
+        print(f"{self.name} received event")
+
+if __name__ == "__main__":
+    # 实现观察者模式
+    # 创建控制器
+    controller = Controller()
+    # 创建订阅者
+    subscriber1 = Subscriber("subscriber1")
+    subscriber2 = Subscriber("subscriber2")
+
+    controller.add_callback(subscriber1.on_event)
+    controller.add_callback(subscriber2.on_event)
+
+    controller.execute_callbacks()
+
+    print('-'*20)
+    del subscriber1
+    controller.execute_callbacks()
+```
+
+该方法适用于：
+
+- 事件处理系统
+- 观察者模式
+- 插件系统
+
+#### 弱引用容器
+专门用于处理缓存或临时存储对象的容器类型。
+
+弱引用容器不会阻值其中对象被释放。
+
+**WeakKeyDictionary**
+该字典的键是弱引用的，当键对象没有强引用时，对应的键值对会被删除。
+
+> 当把一个与现有键引用相同对象（但标识名不同）的键插入字典时，它会替换对应键的值，但不会修改键的名称。
+
+```python
+dict = weakref.WeakKeyDictionary()
+# 与一般字典类似
+dict[obj] = 'value'
+```
+
+**WeakValueDictionary**
+该字典的值是弱引用的，键不是。该容器非常适合实现对象池或缓存系统。
+
 
 ## 函数
 ### 魔术方法
@@ -792,18 +1203,51 @@ def high_order_func(func, arg: Iterable):
 ```
 
 ### 缓存
+常用的缓存装饰器是`functools.lru_cache`。`functools.cache`是`functools.lru_cache`的简单封装，适合短期轻量级任务。
+
+`functools.cache`不需要清除旧值，所以比带有大小限制的`functools.lru_cache`更小更快，等价于`lru_cache(maxsize=None)`。
+
+```python
+from functools import cache
+
+@cache
+def fib(n):
+    pass
+```
+
 #### functools.lru_cache
+
+LRU缓存使用“最近使用优先Least Recently Used”算法，当缓存已满时，最近最少使用的值将被删除。
+
+`lru_cache`使用字典来缓存结果，因此传递给被缓存函数的参数必须是可哈希的。
+
+`lru_cache`是线程安全的。
+
 ```python
 from functools import lru_cache
 
-@lru_cache(maxsize=32)
+# maxsize默认缓存128个结果，常用2的幂；typed为不同类型的参数是否分别缓存，默认为False，即fib(1)与fib(1.0)会被视作相同调用
+@lru_cache(maxsize=32, typed=False)
 def fib(n):
     if n < 2:
         return n
     return fib(n - 1) + fib(n - 2)
 
 print(fib(40))
+
+# 打印当前缓存详细信息
+print(fib.cache_info())
+# 打印当前缓存参数
+print(fib.cache_params())
+# 清空缓存
+fib.cache_clear()
 ```
+
+缓存大小应根据数据数量、大小、访问频率，服务器配置、负载均衡等设定，要定期监控缓存效果。
+
+缓存穿透问题：大量查询不存在的数据 —— 对空结果进行缓存
+缓存血崩问题：大量缓存同时时效 —— 设置随机过期时间
+缓存不一致问题：缓存与源数据不一致 —— 设置更新策略
 
 ### 装饰器
 #### functools.wraps保留被装饰函数元数据
