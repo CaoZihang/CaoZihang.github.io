@@ -144,6 +144,20 @@ for item in main_generator():
 
 生成器可用于大文件、大数据处理。
 
+### filter
+
+filter函数用于从可迭代对象中提取值。
+
+对于简单的提取更建议使用推导式或生成器。
+
+```python
+iterable = [1, 2, 3, 4, 5]
+def is_even(n): return n % 2 == 0
+result = filter(is_even, iterable)
+# 使用list列出所有结果
+print(list(result))
+```
+
 ### 枚举enum
 python中，枚举enum时一种特殊类，它提供了一种将一组相关常量定义为一个单一类型的方式。
 
@@ -746,8 +760,8 @@ with open('user_data.pkl', 'rb') as f:
 
 - 数字签名
 
-```Python
-import pickle
+```python
+Import pickle
 import hmac
 import hashlib
 
@@ -773,7 +787,7 @@ def load_with_signature(file, key):
 
     # 重新计算签名
     received_signature = hmac.new(
-        secret_key.encode(),
+        key.encode(),
         serialized,
         hashlib.sha256
     ).hexdigest()
@@ -1458,6 +1472,35 @@ def render(shape: Drawable) -> None:
 render(Circle())
 ```
 
+### Mixin
+
+Mixin是一种设计模式，它将多个具有单一功能的Mixin类通过多重继承方式，动态地以插件式方式为类添加功能。
+
+Mixin将功能模块化，解耦功能与类，提高代码复用，便于功能维护。
+
+每个Mixin类应只提供单一的功能；不同Mixin之间应保持独立，避免相互依赖；避免在不同的Mixin类中使用相同的方法名；每个Mixin类应能够与其他Mixin类自由组合；通常不包含状态数据。
+
+Mixin类通常以`Mixin`名称结尾，初始化时要注意多重继承的顺序。
+
+```python
+class LoggerMixin:
+    def log(self, message):
+        print(f"Logging: {message}")
+
+class TimeStampMixin:
+    def timestamp(self):
+        return datetime.now()
+
+class System(LoggerMixin, TimeStampMixin):
+    def start(self):
+        self.log(f"Starting at {self.timestamp()}")
+
+system = System()
+system.start()
+system.log("Hello World")
+print(system.timestamp())
+```
+
 ### 元类metaclass
 
 元类就是类的类（工厂），它定义了创建类时的规则。
@@ -1643,6 +1686,45 @@ user: UserProfile = {
 class Customer:
     name: str
     age: int
+```
+
+### __slots__
+
+Python中，对象默认使用字典`__dict__`来动态的管理属性，该字典需要为其分配额外的内存空间来支持动态的属性添加或删除。
+
+`__slots__`则是使用固定大小的数组代替字典存储属性，并在实例创建时预分配内存空间。
+
+`__slots__`以牺牲动态性为代价，节省了内存开销。
+
+```python
+class Person:
+    # 若希望使用弱引用，应显示地包含__weakref__
+    __slots__ = ('name', 'age', '__weakref__')
+
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+obj = Person('John', 25)
+# 此时使用obj.__dict__会报错AttributeError
+```
+
+对于继承关系，子类应显示定义`__slots__`，否则会丧失优化效果。
+
+```python
+class Parent:
+    __slots__ = ('parent_attr',)
+
+    pass
+
+# 推荐显示定义，更清晰
+class Child(Parent):
+    __slots__ = ('parent_attr', 'child_attr')
+    pass
+
+# 动态合并父类的__slots__
+class Child(Parent):
+    __slots__ = Parent.__slots__ + ('child_attr',)
 ```
 
 ## 控制流
@@ -2845,3 +2927,244 @@ class User(BaseModel):
             raise ValueError('Total price too high')
         return self
 ```
+
+## 加密
+
+### hashlib & hmac
+
+hashlib提供了常见的安全哈希算法：SHA1，SHA224，SHA256，SHA384，SHA512，SHA-3系列，RSA的MD5算法。
+
+允许多线程，当构造器或`.update`方法中计算一次性提供超过2047字节数据的哈希时会释放GIL。
+
+hmac是基于hashlib实现的，它构建了更便利的使用机制，二者API基本相同。
+
+```python
+import hashlib
+import hmac
+
+# key为指定密钥的bytes或bytearray对象
+key = b'secret'
+# msg为待加密数据，会调用update(msg)方法
+# HMAX.update多次调用等价于将msg拼接后再加密
+msg = b'hello world'
+# digestmod为指定哈希算法，支持所有适用于hashlib.new()的算法
+digestmod = hashlib.sha256
+hmac.new(key, msg, digestmod).hexdigest()
+
+# 比较两个哈希值是否相等
+hmac.compare_digest(a, b)
+
+# 二进制文件哈希
+with open('file', 'rb') as f:
+    digest = hashlib.file_digest(f, 'sha256').hexdigest()
+```
+
+#### 密钥派生
+密钥派生和密钥延展算法被设计用于安全密码哈希。为对抗彩虹表等攻击，好的密码哈希函数必须可以微调、放慢计算速度，并加盐。
+
+加盐是将随机数据添加到密码中，以增加密码的难度。
+
+服务器会对哈希值和盐进行存储。
+
+```python
+hash_name = 'sha256'
+password = b'password'
+# 生成16字节的随机盐值
+salt = os.urandom(16)
+# 2022年建议使用数万次的SHA-256迭代
+# 迭代数应基于哈希算法和机器算力选择
+iterations = 100000
+hashlib.pbkdf2_hmac(hash_name, password, salt, iterations, dklen=None)
+```
+
+### 第三方库
+
+常用PyCryptodome库。
+
+## 测试
+
+以待测试的模块或功能为一个整体，创建一个继承`unittest.TestCase`的子类，类的名称最好形如`TestFunc`。
+
+测试用例方法必须以`test_`开头。
+
+```python
+import unittest
+class TestCase(unittest.TestCase):
+    def test_func(self):
+        self.assertEqual(1, 1)
+
+if __name__ == '__main__':
+    unittest.main()
+```
+
+unittest可以通过命令行运行指定模块、类或用例的测试：
+
+```cmd
+python -m unittest test_module.TestCase.test_func
+```
+
+### 测试前后置操作
+
+若测试类中所有用例在运行之前或之后需要进行相同的操作（如配置或还原），可以使用`setUp()`和`tearDown()`方法。
+
+在运行每个**测试**时，`setUp()`、`tearDown()`和`__init__()`方法都会被调用一次。
+
+测试类运行前后的操作通过`setUpClass()`和`tearDownClass()`方法配置，且必须使用`@classmethod`。
+
+```python
+import unittest
+
+class TestCase(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        print('Start')
+
+    @classmethod
+    def tearDownClass(cls):
+        print('End')
+
+    def setUp(self):
+        print('Start')
+
+    def tearDown(self):
+        print('Done')
+
+    def test_func1(self):
+        pass
+
+    def def test_func2(self):
+        pass
+
+# Start - test_func1 - Done
+# Start - test_func2 - Done
+```
+
+### 分组测试
+
+若希望将一些测试组合在一起单独执行，可以使用`unittest.TestSuite`。
+
+```python
+def player_test_suite():
+    suite = unittest.TestSuite()
+    suite.addTest(TestCase('test_func1'))
+    suite.addTest(PlayerTestCase('test_func2'))
+    return suite
+
+if __name__ == '__main__':
+    runner = unittest.TextTestRunner()
+    runner.run(player_test_suite())
+```
+
+推荐将测试代码放在单独模块中。
+
+### 跳过测试 & 测试失败
+
+可以设置测试跳过指定的测试用例、测试类或测试模块。
+
+`@unittest.skip(reason)`跳过被装饰的测试用例或类，测试时会跳过并打印reason。
+
+`@unittest.skipIf(condition, reason)`当condition为True时跳过被装饰的测试用例或类。
+
+`@unittest.skipUnless(condition, reason)`当condition为False时跳过被装饰的测试用例或类。
+
+`@unittest.expectedFailure`标记测试用例为预期失败，若测试失败或报错则认为测试成功，若测试通过则认为测试失败。
+
+被跳过的测试用例的`setUp()`和`tearDown()`方法不会被调用，被跳过类的`setUpClass()`和`tearDownClass()`方法也不会被调用。
+
+```python
+class TestCase(unittest.TestCase):
+    @unittest.skip('Skip reason')
+    def test_nothing(self):
+        self.fail('Should not happen')
+
+    @unittest.skipIf(sys.platform.startswith('win'), 'Not supported on Windows')
+    def test_format(self):
+        pass
+
+    @unittest.skipUnless(sys.platform.startswith('win'), 'Requires Windows'):
+    def test_gui(self):
+        pass
+
+    @unittest.expectedFailure
+    def test_fail(self):
+        self.assertEqual(1, 0, 'Expected failure')
+
+@unittest.skip('Skip reason')
+class SkippedTestCase(unittest.TestCase):
+    def test_func(self):
+        pass
+```
+
+### 子测试
+
+对于只有参数不同的一些测试，可以通过子测试一同构建。
+
+```python
+class TestCase(unittest.TestCase):
+    def test_even(self):
+        """
+        Test even numbers
+        """
+        for i in range(0, 6):
+            with self.subTest(i=i):
+                self.assertEqual(i % 2, 0)
+```
+
+### 断言
+所有断言都支持`msg`可选参数，用于打印测试失败时的自定义信息。
+
+- `assertEqual(a, b, msg=None)` & `assertNotEqual(a, b, msg=None)`
+- `assertTrue(x, msg=None)` & `assertFalse(x, msg=None)`
+  - 尽可能使用具体的断言，而不是True/False，它们提供的失败信息不详细
+- `assertIs(a, b, msg=None)` & `assertIsNot(a, b, msg=None)`
+- `assertIsNone(x, msg=None)` & `assertIsNotNone(x, msg=None)`
+- `assertIn(a, b, msg=None)` & `assertNotIn(a, b, msg=None)`
+- `assertInstance(a, b, msg=None)` & `assertNotInstance(a, b, msg=None)`
+- `assertAlmostEqual(a, b, place=7, msg=None)` & `assertNotAlmostEqual(a, b, place=7, msg=None)`
+  - `place`为精度，等价于`round(a-b, 7) == 0`
+- `assertGreater(a, b, msg=None)` & `assertGreaterEqual(a, b, msg=None)`
+  - > & >=
+- `assertLess(a, b, msg=None)` & `assertLessEqual(a, b, msg=None)`
+- `assertRegex(s, r)` & `assertNotRegex(s, r)`
+  - `r.search(s)`
+- `assertCountEqual(a, b, msg=None)`
+  - a和b拥有相同数量的相同元素（与顺序无关）
+
+此外，unittest还支持对报错、警告或触发日志的断言。
+
+### 单元测试覆盖率
+
+通常使用`coveragepy`模块计算单元测试覆盖率。
+
+```cmd
+coverage run -m unittest test_module.py
+coverage report # 报告行覆盖率
+coverage report -m # 额外报告未覆盖的行
+
+coverage html # 生成html报告
+```
+
+coveragepy默认不包含安装的库的测试覆盖率，若希望分析指定的库：
+
+```cmd
+<!-- omit指定忽略的部分 -->
+coverage run --source [my_module] --omit=*/my_module/omit/* -m unittest
+```
+
+也可以将omit部分单独写到`.coveragerc`配置文件中，避免在命令行中多次输入。
+
+```.coveragerc
+[run]
+omit =
+    # 忽略外部文件
+    */venv/*
+```
+
+## debug & 性能分析
+
+### pdb
+
+### VizTracer
+
+[作者高天](https://www.bilibili.com/video/BV1d34y1C78W?spm_id_from=333.788.videopod.episodes&vd_source=3a2d88cb18aadffe0dabe9dd1ee84683&p=6)
+
