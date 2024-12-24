@@ -3164,7 +3164,75 @@ omit =
 
 ### pdb
 
+- 代码中添加`breakpoint()`打断点
+  - `b [line]`命令行创建断点
+- `p [var]`打印变量
+- `w`调用栈
+- `l`当前行附近代码
+  - `ll`当前函数所有代码
+- `u`向上调整当前帧；`d`向下调整当前帧
+- `n`执行下一行命令，不会进入函数内部
+  - `s`执行下一行命令，进入函数内部
+    - `r`继续执行直到当前函数返回
+  - `c`继续运行直到遇到断点或程序结束
+  - `unt [line]`一直运行到指定行
+- `retval`打印当前函数最后一次返回值
+  - `a`打印当前函数的参数
+- `cl [line]`清除指定断点，若不指定行号则删除所有断点
+- `q`退出pdb
+- `restart`重启
+- `h`帮助
+- `ignore [bpnumber] [count]`为指定的bpnumber断点设置忽略次数，每次程序经过bpnumber断点时，count-1，直到count为0时，断点被激活
+- `condition [bpnumber] [condition]`当condition表达式计算结果为`True`时激活断点
+
+`pdb`可以在debugger中运行任何合法的python命令。
+
+```cmd
+<!-- 被调试的程序异常退出，自动进入pdb事后调试 -->
+python -m pdb myscript.py
+```
+
 ### VizTracer
 
 [作者高天](https://www.bilibili.com/video/BV1d34y1C78W?spm_id_from=333.788.videopod.episodes&vd_source=3a2d88cb18aadffe0dabe9dd1ee84683&p=6)
 
+在命令行中，将`python`替换为`viztracer`，即可使用。
+
+```cmd
+viztracer main.py
+vizviewer [report.json] # 查看报告
+
+Ctrl+C # 结束
+```
+
+报告中：
+- `w` Zoom In
+- `s` Zoom Out
+- 'a' Left
+- 'd' Right
+
+#### 指定代码块进行分析
+
+```python
+from viztracer import VizTracer
+
+...
+
+with VizTracer():
+    ... # 待分析代码
+```
+
+正常使用`python main.py`即可。
+
+VizTracer支持Jupyter，使用方法见文档。
+
+#### 基础命令
+
+- `viztracer -h` 查看帮助
+- `viztracer -o [path/[name].json] main.py` 指定输出文件
+- `viztracer --open main.py` 运行后直接在浏览器中打开报告
+- `viztracer --log_async main.py` 对协程提供更好的支持
+- `vizviewer -h` 查看帮助
+- `vizviewer report.json -p [port]` 修改端口，默认9001
+- `vizviewer report.json --once` 打开报告后自动终止进程
+- `vizviewer [./]` 打开指定文件夹，可检查内部所有报告
