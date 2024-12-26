@@ -334,7 +334,7 @@ flags: (可多个同时使用)
 
 `:[range] global[!] /{pattern}/ [cmd]`
 
-不同于其他ex命令，global命令范围的省却时整个文件（%），不是当前行。
+不同于其他ex命令，global命令范围的省缺时默认整个文件（%），不是当前行。
 
 `[cmd]`可以是除了global外的所有ex命令，包括normal。
 
