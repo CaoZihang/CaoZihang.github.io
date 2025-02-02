@@ -1059,6 +1059,17 @@ dict[obj] = 'value'
 **WeakValueDictionary**
 该字典的值是弱引用的，键不是。该容器非常适合实现对象池或缓存系统。
 
+### 只读字典
+当你希望将一个字典作为类的属性暴露给外部，但又不希望外部代码修改字典内容，可创建一个不可变的映射对象代理，构建只读字典。
+
+`type.MappingProxyType`接收一个可变的映射对象（如字典），返回一个不可变的映射对象代理。用户可以通过这个代理对象查看原始映射的键值对，但不能对其进行修改、添加或删除。
+
+```python
+import type
+
+original_dict = {'key1': 'value1', 'key2': 'value2'}
+readonly_dict = type.MappingProxyType(original_dict)
+```
 
 ## 函数
 ### 魔术方法
@@ -1784,6 +1795,18 @@ def process_files(file_list):
         # 退出with语句后，所有文件会自动关闭
 ```
 
+#### contextlib.suppress隐式抑制特定异常
+
+```python
+import contextlib
+
+with contextlib.suppress(FileNotFoundError, ZeroDivisionError):
+    print(1 / 0)
+    print(open("nonexistent_file").read())
+
+print("After suppression, continue")
+```
+
 ### 模式匹配match-case
 与if-else相比，模式匹配除了能匹配简单数据类型外，还可以根据复杂数据结构进行匹配。
 
@@ -1922,6 +1945,83 @@ init()
 import importlib
 
 module = importlib.import_module("module_name")
+```
+
+#### ZIP打包和分发
+
+Python支持直接从ZIP文件中导入模块，该功能适用于简化部署流程、嵌入式系统开发和插件化架构的场景。
+
+##### 单个模块打包
+
+```cmd
+# Linux
+zip example.zip module.py
+
+# Windows
+powershell Compress-Archive -Path module.py -DestinationPath example.zip
+```
+
+也可以通过脚本进行打包
+
+```python
+import zipfile
+
+with zipfile.ZipFile("example.zip", "w") as zip_file:
+    zip_file.write("module.py")
+```
+
+##### Python库打包
+
+```cmd
+# Linux
+zip -r example.zip example/
+
+# Windows
+powershell Compress-Archive -Path example -DestinationPath example.zip
+```
+
+```python
+import zipfile
+import os
+
+with zipfile.ZipFile("example.zip", "w") as zip_file:
+    for root, dirs, files in os.walk("example"):
+        for file in files:
+            file_path = os.path.join(root, file)
+            arcname = os.path.relpath(file_path, "example")
+            zip_file.write(file_path, arcname)
+```
+
+##### 导入ZIP
+
+- ZIP导入不支持C拓展模块（如`.so`或`.pyd`文件）
+- 必须包含`.pyc`文件
+- 路径结构必须与Python模块规则匹配
+
+```python
+import zipimport
+
+importer = zipimport.zipimporter("example.zip")
+module = importer.load_module("example")
+print(module.func())
+```
+
+插件系统
+```python
+import zipimport
+
+def load_plugin(zip_path: str, module_name: str):
+    try:
+        importer = zipimport.zipimporter(zip_path)
+        plugin_module = importer.load_module(module_name)
+        return plugin_module
+    except zipimport.ZipImportError as e:
+        print(f"Failed to load plugin from {zip_path}: {e}")
+        return None
+
+plugins = load_plugin("example.zip", "example")
+if plugins:
+    plugins.func()
 ```
 
 ### 状态机
@@ -2456,6 +2556,20 @@ if __name__ == '__main__':
         res = pool.apply_async(func, (1,))
         print(res.get(timeout=1))
         # 多次调用可能会使用多进程
+```
+
+### 重试机制 tenacity库
+
+在网络请求、数据库操作、文件读写等场景下，重试机制可以非常有效的提高程序性能。
+
+`tenacity`库允许开发者灵活地定义重试条件、间隔、最大重试次数等。
+
+```python
+from tenacity import retry, stop_after_attempt, wait_fixed
+
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
+def func():
+    pass
 ```
 
 ## 类型提示
