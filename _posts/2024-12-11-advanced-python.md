@@ -3115,6 +3115,9 @@ unittest可以通过命令行运行指定模块、类或用例的测试：
 
 ```cmd
 python -m unittest test_module.TestCase.test_func
+
+<!-- 运行整个项目的测试 -->
+python -m unittest discover -s . -p "test_*.py"
 ```
 
 ### 测试前后置操作
@@ -3248,10 +3251,11 @@ class TestCase(unittest.TestCase):
 
 ### 单元测试覆盖率
 
-通常使用`coveragepy`模块计算单元测试覆盖率。
+通常使用`coverage`模块计算单元测试覆盖率，需要安装。
 
 ```cmd
-coverage run -m unittest test_module.py
+coverage run -m unittest test_module.py # 运行指定测试
+coverage run -m unittest discover -s . -p "test_*.py" # 运行所有测试
 coverage report # 报告行覆盖率
 coverage report -m # 额外报告未覆盖的行
 
@@ -3272,6 +3276,25 @@ coverage run --source [my_module] --omit=*/my_module/omit/* -m unittest
 omit =
     # 忽略外部文件
     */venv/*
+```
+
+一个常用的配置：
+
+```.coveragerc
+[run]
+source = app
+
+omit =
+    */test/*
+    */__init__.py
+
+[report]
+fail_under = 100
+
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if __name__ == .__main__.:
 ```
 
 ## debug & 性能分析
