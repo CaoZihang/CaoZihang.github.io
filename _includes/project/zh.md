@@ -1,19 +1,19 @@
 
 
-> 兴趣主线：在数字智能化新技术背景下，消费者决策领域的新话题及该领域基于数据科学的调研、分析与干预手段。
+> 兴趣主线：在数字智能化新技术背景下，市场决策领域的新话题及该领域基于数据科学的调研、分析与干预手段。
 >
 
-# <center><font color="#3879B1">消费者旅程建模</font></center>
+# <center><font color="#3879B1">消费者决策行为量化建模</font></center>
+
+## <center>决策</center>
+
+
 
 ## <center>搜索</center>
 
 
 
 ## <center>认知</center>
-
-
-
-## <center>决策</center>
 
 
 
@@ -30,6 +30,10 @@
 
 
 <div style="text-align: center; width: 70%; margin: 0 auto; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+
+## <center>LynSight 数影</center>
+
+安全便利的数据采集与分析工具。
 
 ## <center>Subtitle Blocker 字幕遮挡</center>
 

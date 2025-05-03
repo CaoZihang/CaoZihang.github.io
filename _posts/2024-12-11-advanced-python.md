@@ -3240,7 +3240,7 @@ class TestCase(unittest.TestCase):
 - `assertAlmostEqual(a, b, place=7, msg=None)` & `assertNotAlmostEqual(a, b, place=7, msg=None)`
   - `place`为精度，等价于`round(a-b, 7) == 0`
 - `assertGreater(a, b, msg=None)` & `assertGreaterEqual(a, b, msg=None)`
-  - > & >=
+  - \> & >=
 - `assertLess(a, b, msg=None)` & `assertLessEqual(a, b, msg=None)`
 - `assertRegex(s, r)` & `assertNotRegex(s, r)`
   - `r.search(s)`
