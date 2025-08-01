@@ -130,7 +130,7 @@ Cohesion - Separation - ALignment
     - separate: 避免近邻的重要性
     - match: 匹配邻居朝向的重要性
 
-# Model
+## Model
 - Boid Flockers
     - population_size: 鸟的数量
     - width: 空间宽度
