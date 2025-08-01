@@ -74,6 +74,7 @@ tags:
 > 若该系统中存在一个或多个物种灭绝，则称该系统不稳定。
 
 ## 模型设定
+
 ### Sheep-Wolves版本
 狼和羊在陆地上随意漫游，狼狩猎羊。狼每个时间步都会消耗能量，它必须捕猎羊来补充能量，否则就会被饿死。
 狼和羊在每个时间步有固定的概率繁殖后代。
@@ -111,6 +112,7 @@ tags:
 - 狼会追羊
 
 # Boids Flockers model
+
 ## Agents
 Cohesion - Separation - ALignment
 - Boid
@@ -123,6 +125,7 @@ Cohesion - Separation - ALignment
     - cohere: 匹配邻居位置的重要性
     - separate: 避免近邻的重要性
     - match: 匹配邻居朝向的重要性
+
 # Model
 - Boid Flockers
     - population_size: 鸟的数量
@@ -137,31 +140,37 @@ Cohesion - Separation - ALignment
     - seed: 随机数种子
 
 # Boltzmann Wealth Model
+
 ## Agents
 - MoneyAgent
     - move
     - give_money
+
 ## Model
 - BoltzmannWealth
     - compute_gini
 
 # Conways Game of Life
+
 ## Agents
 - Cell
     - is_alive
     - neighbors
     - determine_state
     - assume_state
+
 ## Model
 - ConwaysGameOfLive
 
 # Demographic Prisoners Dilemma On A Grid
+
 ## Agents
 - PDAgent
     - is_coorperating
     - step
     - advance
     - increment_score
+
 ## Model
 - 损益矩阵
 
@@ -191,6 +200,7 @@ Cohesion - Separation - ALignment
     - x, y: 坐标
     - vision: 视野
     - max_jail_term: 最大刑期
+
 ## Model
 - EpsteinCivilViolence
 
@@ -206,6 +216,7 @@ Cohesion - Separation - ALignment
     - radius: 邻居检索半径
 
 # Virus On A Network
+
 ## Agents
 - State 智能体状态枚举类
     - 正常人 - 感染者 - 免疫者
@@ -215,13 +226,16 @@ Cohesion - Separation - ALignment
     - virus_check_frequency: 感染者状态检查频率
     - recovery_chance: 恢复概率
     - gain_resistance_chance: 获得免疫概率
+
 ## Model
 - VirusOnNetwork
     - num_nodes: Number of nodes in the network
     - avg_node_degree: Average number of connections per node
     - prob: 节点之间存在边的概率
     - initial_outbreak_size:Number of nodes initially infected
+
 # Sugarscape Constant Growback Model With Traders
+
 ## Agent
 - Resource: 资源智能体每时间步会生长一单位糖或香料，直到达到最大量
     - Resource可以被收获或交易
