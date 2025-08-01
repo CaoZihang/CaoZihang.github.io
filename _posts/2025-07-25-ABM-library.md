@@ -11,6 +11,10 @@ tags:
   
   
 ---
+ <font style="font-weight: bold;">目录</font>
+
+* 目录
+{:toc}
 
 # Party Model
 > 一场鸡尾酒聚会，参与者会聚成给定数量的团体
