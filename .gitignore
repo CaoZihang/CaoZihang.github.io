@@ -8,3 +8,4 @@ node_modules
 *.lock
 *.sh
 .jekyll-cache
+.claude
